@@ -1,5 +1,10 @@
 {
   "name": "@elrincondelnini/api",
+  "type": "module",
+  "imports": {
+    "#modules/*": "./dist/src/modules/*",
+    "#common/*": "./dist/src/common/*"
+  },
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -17,21 +22,39 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "db:init": "prisma db init",
+    "db:migration:status": "prisma migration status",
+    "contract:emit": "prisma contract emit"
   },
   "dependencies": {
+    "@elrincondelnini/types": "workspace:*",
+    "@nestjs/axios": "^12.0.0",
+    "@nestjs/cache-manager": "^12.0.0",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^12.0.0",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@prisma/orm-postgres": "8.0.0-rc.8",
+    "@supabase/supabase-js": "^2.112.4",
+    "axios": "^1.20.0",
+    "bullmq": "^6.3.2",
+    "cache-manager": "^7.2.9",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1",
+    "dotenv": "^17.4.2",
+    "pg": "^8.23.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@jest/globals": "^30.5.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
+    "@prisma/cli-engine": "0.2.3",
     "@types/express": "^5.0.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.7",
@@ -42,6 +65,7 @@
     "globals": "^16.0.0",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",
+    "prisma": "8.0.0-rc.10",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
@@ -59,8 +83,25 @@
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
+    "preset": "ts-jest/presets/default-esm",
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapper": {
+      "^#modules/(.*)$": "<rootDir>/modules/$1",
+      "^#common/(.*)$": "<rootDir>/common/$1"
+    },
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.(t|j)s$": [
+        "ts-jest",
+        {
+          "useESM": true,
+          "tsconfig": {
+            "moduleResolution": "node",
+            "resolvePackageJsonExports": false
+          }
+        }
+      ]
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

@@ -32,7 +32,9 @@ describe('SupabaseAuthGuard', () => {
   }
 
   it('rejects requests without token', async () => {
-    await expect(guard.canActivate(createContext())).rejects.toThrow(UnauthorizedException);
+    await expect(guard.canActivate(createContext())).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('attaches user to request with valid token', async () => {

@@ -12,7 +12,7 @@ type AuthRequest = Request & { user?: AuthenticatedUser };
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthRequest>();

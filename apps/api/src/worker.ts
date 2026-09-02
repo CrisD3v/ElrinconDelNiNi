@@ -1,7 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { getAppMode, shouldRunWorkers } from './utils/app-mode';
+import { AppModule } from './app.module.js';
+import { getAppMode, shouldRunWorkers } from './utils/app-mode.js';
 
 async function bootstrap() {
   const logger = new Logger('WorkerBootstrap');

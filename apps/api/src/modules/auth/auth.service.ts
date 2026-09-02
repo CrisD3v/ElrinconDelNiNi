@@ -9,7 +9,9 @@ export class AuthService {
 
   constructor(private readonly config: ConfigService) {
     const url = this.config.getOrThrow<string>('SUPABASE_URL');
-    const serviceRoleKey = this.config.getOrThrow<string>('SUPABASE_SERVICE_ROLE_KEY');
+    const serviceRoleKey = this.config.getOrThrow<string>(
+      'SUPABASE_SERVICE_ROLE_KEY',
+    );
     this.supabase = createClient(url, serviceRoleKey, {
       auth: { autoRefreshToken: false, persistSession: false },
     });
@@ -22,7 +24,8 @@ export class AuthService {
       throw new UnauthorizedException('Token is invalid or expired');
     }
 
-    const metadata = data.user.user_metadata as Record<string, unknown> | undefined;
+    const metadata = data.user.user_metadata as
+      Record<string, unknown> | undefined;
     const displayName =
       (typeof metadata?.full_name === 'string' && metadata.full_name) ||
       (typeof metadata?.name === 'string' && metadata.name) ||

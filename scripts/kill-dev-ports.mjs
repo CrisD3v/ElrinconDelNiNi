@@ -4,7 +4,7 @@
  */
 import { execSync } from 'node:child_process';
 
-const PORTS = [3000, 4000];
+const PORTS = [3000, 3001];
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

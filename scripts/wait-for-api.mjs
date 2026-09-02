@@ -1,7 +1,7 @@
 /**
  * Poll del health de la API en desarrollo (informativo).
  */
-const HEALTH_URL = process.env.API_HEALTH_URL ?? 'http://127.0.0.1:4000/api/v1/health';
+const HEALTH_URL = process.env.API_HEALTH_URL ?? 'http://127.0.0.1:3001/api/v1/health';
 const TIMEOUT_MS = Number(process.env.API_HEALTH_TIMEOUT_MS ?? 30000);
 const INTERVAL_MS = 1000;
 

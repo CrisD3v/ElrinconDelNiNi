@@ -7,13 +7,13 @@ import { access } from 'node:fs/promises';
 import { join } from 'node:path';
 import { killDevPorts } from './kill-dev-ports.mjs';
 
-const HEALTH_URL = process.env.API_HEALTH_URL ?? 'http://127.0.0.1:4000/api/v1/health';
+const HEALTH_URL = process.env.API_HEALTH_URL ?? 'http://127.0.0.1:3001/api/v1/health';
 const HEALTH_TIMEOUT_MS = Number(process.env.API_HEALTH_TIMEOUT_MS ?? 120000);
 const WORKER_BUNDLE_TIMEOUT_MS = 90000;
 const POLL_MS = 1000;
 
 const API_DIR = join(import.meta.dirname, '../apps/api');
-const WORKER_ENTRY = join(API_DIR, 'dist/worker.js');
+const WORKER_ENTRY = join(API_DIR, 'dist/src/worker.js');
 
 const children = [];
 let apiExitedEarly = false;
@@ -41,7 +41,7 @@ function spawnDev(name, args, envExtra = {}) {
 }
 
 function spawnWorker() {
-  const child = spawn('node', ['--watch', 'dist/worker.js'], {
+  const child = spawn('node', ['--watch', 'dist/src/worker.js'], {
     cwd: API_DIR,
     stdio: 'inherit',
     env: { ...process.env, APP_MODE: 'worker' },
@@ -79,7 +79,7 @@ async function waitForApi() {
   while (Date.now() - start < HEALTH_TIMEOUT_MS) {
     if (apiExitedEarly) {
       throw new Error(
-        'La API terminó antes de estar lista. Cierra otras terminales con `pnpm dev` o libera el puerto 4000.',
+        'La API terminó antes de estar lista. Cierra otras terminales con `pnpm dev` o libera el puerto 3001.',
       );
     }
 
@@ -115,15 +115,15 @@ async function waitForWorkerBundle() {
     }
   }
 
-  throw new Error('dist/worker.js no apareció. ¿La API watch compiló?');
+  throw new Error('dist/src/worker.js no apareció. ¿La API watch compiló?');
 }
 
 async function main() {
-  console.log('[dev] Liberando puertos 3000/4000...');
+  console.log('[dev] Liberando puertos 3000/3001...');
   await killDevPorts();
 
   console.log('[dev] Iniciando API (@elrincondelnini/api)...');
-  spawnDev('api', ['--filter', '@elrincondelnini/api', 'dev'], { APP_MODE: 'api' });
+  spawnDev('api', ['--filter', '@elrincondelnini/api', 'start:dev'], { APP_MODE: 'api' });
 
   await waitForApi();
   await waitForWorkerBundle();

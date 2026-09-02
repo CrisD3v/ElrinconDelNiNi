@@ -1,9 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { AxiosResponse, AxiosError, AxiosHeaders } from 'axios';
-import { jest, expect, describe, it, beforeEach, afterEach } from '@jest/globals';
+import {
+  jest,
+  expect,
+  describe,
+  it,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 import { SeriesService } from '../series.service.js';
 import { SeriesLanguage } from '../dto/series-query.dto.js';
 
@@ -138,7 +148,7 @@ describe('SeriesService', () => {
       const mockMangaResponse = {
         id: '12345',
         attributes: {
-          title: { 'ja': 'Original Title' },
+          title: { ja: 'Original Title' },
           description: {},
           tags: [],
           availableTranslatedLanguages: [],
@@ -175,21 +185,31 @@ describe('SeriesService', () => {
 
       mockHttpService.get.mockReturnValue(throwError(() => error));
 
-      await expect(service.getSeriesDetail('invalid-id')).rejects.toThrow(NotFoundException);
+      await expect(service.getSeriesDetail('invalid-id')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw InternalServerErrorException on other errors', async () => {
-      const error = new AxiosError('Network Error', '500', undefined, undefined, {
-        status: 500,
-        statusText: 'Internal Server Error',
-        data: {},
-        headers: {},
-        config: { headers: new AxiosHeaders() },
-      } as any);
+      const error = new AxiosError(
+        'Network Error',
+        '500',
+        undefined,
+        undefined,
+        {
+          status: 500,
+          statusText: 'Internal Server Error',
+          data: {},
+          headers: {},
+          config: { headers: new AxiosHeaders() },
+        } as any,
+      );
 
       mockHttpService.get.mockReturnValue(throwError(() => error));
 
-      await expect(service.getSeriesDetail('id')).rejects.toThrow(InternalServerErrorException);
+      await expect(service.getSeriesDetail('id')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

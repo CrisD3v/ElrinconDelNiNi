@@ -5,10 +5,7 @@ import { SeriesController } from './series.controller.js';
 import { SeriesService } from './series.service.js';
 
 @Module({
-  imports: [
-    HttpModule,
-    CacheModule.register(),
-  ],
+  imports: [HttpModule, CacheModule.register()],
   controllers: [SeriesController],
   providers: [SeriesService],
   exports: [SeriesService],

@@ -34,3 +34,9 @@ export interface ChapterListDto {
   limit: number;
   offset: number;
 }
+
+export interface ChapterPagesDto {
+  chapterId: string;
+  pages: string[];
+  pagesDataSaver: string[];
+}

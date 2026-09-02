@@ -1,9 +1,20 @@
-import { Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { AxiosError } from 'axios';
 import { SeriesQueryDto } from './dto/series-query.dto.js';
-import { ChapterDto, ChapterListDto, SeriesDetailDto, SeriesListDto } from './dto/series-response.dto.js';
+import {
+  ChapterDto,
+  ChapterListDto,
+  ChapterPagesDto,
+  SeriesDetailDto,
+  SeriesListDto,
+} from './dto/series-response.dto.js';
 
 @Injectable()
 export class SeriesService {
@@ -78,7 +89,10 @@ export class SeriesService {
     }
   }
 
-  async getSeriesChapters(id: string, query: SeriesQueryDto): Promise<ChapterListDto> {
+  async getSeriesChapters(
+    id: string,
+    query: SeriesQueryDto,
+  ): Promise<ChapterListDto> {
     const params = {
       limit: query.limit || 100,
       offset: query.offset || 0,
@@ -113,7 +127,33 @@ export class SeriesService {
     }
   }
 
-  private async fetchSeriesList(params: Record<string, any>): Promise<SeriesListDto> {
+  async getChapterPages(chapterId: string): Promise<ChapterPagesDto> {
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(`${this.baseUrl}/at-home/server/${chapterId}`),
+      );
+
+      const baseUrl = data.baseUrl;
+      const hash = data.chapter.hash;
+      const dataFiles: string[] = data.chapter.data || [];
+      const dataSaverFiles: string[] = data.chapter.dataSaver || [];
+
+      const pages = dataFiles.map(
+        (filename: string) => `${baseUrl}/data/${hash}/${filename}`,
+      );
+      const pagesDataSaver = dataSaverFiles.map(
+        (filename: string) => `${baseUrl}/data-saver/${hash}/${filename}`,
+      );
+
+      return { chapterId, pages, pagesDataSaver };
+    } catch (error) {
+      this.handleError(error);
+    }
+  }
+
+  private async fetchSeriesList(
+    params: Record<string, any>,
+  ): Promise<SeriesListDto> {
     try {
       const { data } = await firstValueFrom(
         this.httpService.get(`${this.baseUrl}/manga`, { params }),
@@ -134,9 +174,11 @@ export class SeriesService {
 
   private mapMangaToDto(manga: any): SeriesDetailDto {
     const attrs = manga.attributes;
-    
+
     // Find cover art relationship
-    const coverRel = manga.relationships?.find((r: any) => r.type === 'cover_art');
+    const coverRel = manga.relationships?.find(
+      (r: any) => r.type === 'cover_art',
+    );
     let coverArtUrl: string | null = null;
     if (coverRel && coverRel.attributes?.fileName) {
       coverArtUrl = `${this.uploadsUrl}/covers/${manga.id}/${coverRel.attributes.fileName}`;
@@ -144,7 +186,8 @@ export class SeriesService {
 
     // Extract title (usually fallback to first available if en isn't there)
     const title = attrs.title.en || Object.values(attrs.title)[0] || 'Unknown';
-    const description = attrs.description.en || Object.values(attrs.description || {})[0] || '';
+    const description =
+      attrs.description.en || Object.values(attrs.description || {})[0] || '';
     const tags = attrs.tags?.map((t: any) => t.attributes.name.en) || [];
 
     return {
@@ -165,10 +208,15 @@ export class SeriesService {
       if (error.response?.status === 404) {
         throw new NotFoundException('Resource not found in MangaDex API');
       }
-      this.logger.error(`MangaDex API Error: ${error.message}`, error.response?.data);
+      this.logger.error(
+        `MangaDex API Error: ${error.message}`,
+        error.response?.data,
+      );
     } else {
       this.logger.error(`Unexpected Error: ${error.message}`, error.stack);
     }
-    throw new InternalServerErrorException('Failed to communicate with MangaDex API');
+    throw new InternalServerErrorException(
+      'Failed to communicate with MangaDex API',
+    );
   }
 }

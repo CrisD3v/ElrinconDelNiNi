@@ -4,6 +4,14 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
+    "comments": {
+      "model": "Comment",
+      "namespace": "public"
+    },
+    "follows": {
+      "model": "Follow",
+      "namespace": "public"
+    },
     "users": {
       "model": "User",
       "namespace": "public"
@@ -12,13 +20,235 @@
   "domain": {
     "namespaces": {
       "public": {
+        "enum": {
+          "Badge": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "READER",
+                "value": "READER"
+              }
+            ]
+          }
+        },
         "models": {
-          "User": {
+          "Comment": {
+            "fields": {
+              "chapterId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "content": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "imageUrl": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "mangaId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "user": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "chapterId": {
+                  "column": "chapterId"
+                },
+                "content": {
+                  "column": "content"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "imageUrl": {
+                  "column": "imageUrl"
+                },
+                "mangaId": {
+                  "column": "mangaId"
+                },
+                "updatedAt": {
+                  "column": "updatedAt"
+                },
+                "userId": {
+                  "column": "userId"
+                }
+              },
+              "namespaceId": "public",
+              "table": "comments"
+            }
+          },
+          "Follow": {
             "fields": {
               "createdAt": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "followerId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "followingId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "follower": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "followerId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              },
+              "following": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "followingId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "followerId": {
+                  "column": "followerId"
+                },
+                "followingId": {
+                  "column": "followingId"
+                },
+                "id": {
+                  "column": "id"
+                }
+              },
+              "namespaceId": "public",
+              "table": "follows"
+            }
+          },
+          "User": {
+            "fields": {
+              "badges": {
+                "many": true,
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "bannerImage": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "description": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
@@ -50,6 +280,13 @@
                   "kind": "scalar"
                 }
               },
+              "profileImage": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "supabaseId": {
                 "nullable": false,
                 "type": {
@@ -65,11 +302,66 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "comments": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "userId"
+                  ]
+                },
+                "to": {
+                  "model": "Comment",
+                  "namespace": "public"
+                }
+              },
+              "followers": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "followingId"
+                  ]
+                },
+                "to": {
+                  "model": "Follow",
+                  "namespace": "public"
+                }
+              },
+              "following": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "followerId"
+                  ]
+                },
+                "to": {
+                  "model": "Follow",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
+                "badges": {
+                  "column": "badges"
+                },
+                "bannerImage": {
+                  "column": "bannerImage"
+                },
                 "createdAt": {
                   "column": "createdAt"
+                },
+                "description": {
+                  "column": "description"
                 },
                 "displayName": {
                   "column": "displayName"
@@ -82,6 +374,9 @@
                 },
                 "locale": {
                   "column": "locale"
+                },
+                "profileImage": {
+                  "column": "profileImage"
                 },
                 "supabaseId": {
                   "column": "supabaseId"
@@ -103,7 +398,110 @@
       "public": {
         "entries": {
           "table": {
-            "users": {
+            "comments": {
+              "columns": {
+                "chapterId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "content": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "imageUrl": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "mangaId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "updatedAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "userId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "comments"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "chapterId"
+                  ],
+                  "name": "comments_chapterId_idx_411dd3d6",
+                  "prefix": "comments_chapterId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "mangaId"
+                  ],
+                  "name": "comments_mangaId_idx_9c1b55b2",
+                  "prefix": "comments_mangaId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "userId"
+                  ],
+                  "name": "comments_userId_idx_a489d58a",
+                  "prefix": "comments_userId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "follows": {
               "columns": {
                 "createdAt": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -113,6 +511,135 @@
                   },
                   "nativeType": "timestamptz",
                   "nullable": false
+                },
+                "followerId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "followingId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "followerId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "follows"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                },
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "followingId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "follows"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "users"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "followerId"
+                  ],
+                  "name": "follows_followerId_idx_2aa6c62d",
+                  "prefix": "follows_followerId_idx",
+                  "unique": false
+                },
+                {
+                  "columns": [
+                    "followingId"
+                  ],
+                  "name": "follows_followingId_idx_1cf16645",
+                  "prefix": "follows_followingId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "followerId",
+                    "followingId"
+                  ]
+                }
+              ]
+            },
+            "users": {
+              "checks": [
+                {
+                  "expression": "\"badges\"::text[] <@ ARRAY['READER']::text[]",
+                  "name": "users_badges_check_5f5219c5",
+                  "prefix": "users_badges_check"
+                },
+                {
+                  "expression": "array_position(\"badges\", NULL) IS NULL",
+                  "name": "users_badges_elem_not_null_6fdc1213",
+                  "prefix": "users_badges_elem_not_null"
+                }
+              ],
+              "columns": {
+                "badges": {
+                  "codecId": "pg/text@1",
+                  "many": true,
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "Badge",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "bannerImage": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "displayName": {
                   "codecId": "pg/text@1",
@@ -137,6 +664,11 @@
                   },
                   "nativeType": "text",
                   "nullable": false
+                },
+                "profileImage": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "supabaseId": {
                   "codecId": "pg/text@1",
@@ -182,18 +714,48 @@
                 }
               ]
             }
+          },
+          "valueSet": {
+            "Badge": {
+              "kind": "valueSet",
+              "values": [
+                "READER"
+              ]
+            }
           }
         },
         "id": "public",
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "b441c50d18142a143f6fc203edf7e22b272e60422b51a80f134a824d0495baa6"
+    "storageHash": "39e66d6e1edb5f8e607c656405a4150c31fb2059f190e376852a89c90504d5d2"
   },
   "execution": {
-    "executionHash": "a74f8ef3d7079ef39287e5f6ac28bf153e0ed450d5be3a05dba2e21a4583a662",
+    "executionHash": "75fb27f7cda8023b290099cf1bab65624874ed852a0b21eaab35f71f197f781f",
     "mutations": {
       "defaults": [
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "comments"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "column": "id",
+            "namespace": "public",
+            "table": "follows"
+          }
+        },
         {
           "onCreate": {
             "id": "uuidv4",

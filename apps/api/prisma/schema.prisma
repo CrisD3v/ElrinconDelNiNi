@@ -1,14 +1,57 @@
 // use prisma-next
 
+enum Badge {
+  READER
+}
+
 model User {
   id            String         @id @default(uuid())
   supabaseId    String         @unique
   email         String         @unique
   displayName   String?
+  profileImage  String?
+  bannerImage   String?
+  description   String?
+  badges        Badge[]
   locale        String         @default("es")
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now())
 
+  followers     Follow[]       @relation("following")
+  following     Follow[]       @relation("follower")
+  comments      Comment[]
+
   @@index([supabaseId])
   @@map("users")
+}
+
+model Follow {
+  id          String   @id @default(uuid())
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  userId    String
+  mangaId   String?
+  chapterId String?
+  content   String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([mangaId])
+  @@index([chapterId])
+  @@index([userId])
+  @@map("comments")
 }

@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "series": "Series",
+    "favorites": "Favoritos",
+    "search": "Buscar series...",
+    "login": "Iniciar Sesión",
+    "menu": "Menú"
+  },
+  "home": {
+    "hero": {
+      "cta": "Leer ahora",
+      "explore": "Explorar"
+    },
+    "sections": {
+      "releases": "Últimos Lanzamientos",
+      "top": "Top Series",
+      "day": "Series del Día"
+    },
+    "viewAll": "Ver todo"
+  },
+  "series": {
+    "status": {
+      "ongoing": "En emisión",
+      "completed": "Completado",
+      "hiatus": "En pausa",
+      "cancelled": "Cancelado"
+    },
+    "noResults": "No se encontraron series",
+    "loading": "Cargando...",
+    "error": "Error al cargar las series",
+    "page": "Página"
+  },
+  "auth": {
+    "modalTitle": "Iniciar Sesión",
+    "modalDescription": "La autenticación estará disponible próximamente.",
+    "close": "Cerrar"
+  },
+  "locale": {
+    "es": "Español",
+    "en": "English",
+    "label": "Idioma"
+  },
+  "meta": {
+    "title": "El Rincón del NiNi — Tu portal de manga",
+    "description": "Descubre, lee y sigue las mejores series de manga. Últimos lanzamientos, top series y series del día."
+  }
+}

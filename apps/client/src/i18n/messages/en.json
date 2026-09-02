@@ -1,0 +1,48 @@
+{
+  "nav": {
+    "home": "Home",
+    "series": "Series",
+    "favorites": "Favorites",
+    "search": "Search series...",
+    "login": "Sign In",
+    "menu": "Menu"
+  },
+  "home": {
+    "hero": {
+      "cta": "Read now",
+      "explore": "Explore"
+    },
+    "sections": {
+      "releases": "Latest Releases",
+      "top": "Top Series",
+      "day": "Daily Series"
+    },
+    "viewAll": "View all"
+  },
+  "series": {
+    "status": {
+      "ongoing": "Ongoing",
+      "completed": "Completed",
+      "hiatus": "On hiatus",
+      "cancelled": "Cancelled"
+    },
+    "noResults": "No series found",
+    "loading": "Loading...",
+    "error": "Failed to load series",
+    "page": "Page"
+  },
+  "auth": {
+    "modalTitle": "Sign In",
+    "modalDescription": "Authentication will be available soon.",
+    "close": "Close"
+  },
+  "locale": {
+    "es": "Español",
+    "en": "English",
+    "label": "Language"
+  },
+  "meta": {
+    "title": "El Rincón del NiNi — Your manga portal",
+    "description": "Discover, read, and follow the best manga series. Latest releases, top series, and daily picks."
+  }
+}

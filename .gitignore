@@ -32,8 +32,11 @@ logs
 npm-debug.log*
 pnpm-debug.log*
 
-# Testing
+# Testing & Storybook
 coverage
+test-results
+playwright-report
+storybook-static
 
 # Prisma
 apps/api/prisma/*.db

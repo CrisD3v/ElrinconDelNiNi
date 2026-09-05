@@ -9,6 +9,7 @@ export default defineConfig({
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:3000',
+    locale: 'es-ES',
     trace: 'on-first-retry',
   },
 
@@ -19,10 +20,10 @@ export default defineConfig({
     },
   ],
 
-  // In a real CI environment, we would start the web server here
-  // webServer: {
-  //   command: 'pnpm dev',
-  //   url: 'http://localhost:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'pnpm dev',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    timeout: 120000,
+  },
 });

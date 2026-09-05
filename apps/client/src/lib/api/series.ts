@@ -1,9 +1,10 @@
 import { apiGet } from './client';
-import type { SeriesList, SeriesDetail, SeriesQueryParams, ChapterList, ChapterPages } from './types';
+import type { SeriesList, SeriesDetail, SeriesQueryParams, Chapter, ChapterList, ChapterPages } from './types';
 
-/** Convert SeriesQueryParams to a plain record for apiGet */
-function toParams(params: SeriesQueryParams): Record<string, string | number | undefined> {
-  return { ...params };
+/** Convert query params to a plain record for apiGet */
+function toParams(params?: object): Record<string, string | number | boolean | undefined> | undefined {
+  if (!params) return undefined;
+  return params as Record<string, string | number | boolean | undefined>;
 }
 
 /**
@@ -37,8 +38,9 @@ export function searchSeries(params: SeriesQueryParams): Promise<SeriesList> {
 /**
  * Fetch detailed info for a single series.
  */
-export function getSeriesDetail(id: string): Promise<SeriesDetail> {
-  return apiGet<SeriesDetail>(`/series/${id}`);
+export function getSeriesDetail(id: string, lang?: string): Promise<SeriesDetail> {
+  const queryParams = lang ? { lang } : undefined;
+  return apiGet<SeriesDetail>(`/series/${id}`, queryParams);
 }
 
 /**
@@ -48,8 +50,15 @@ export function getSeriesChapters(
   id: string,
   params?: { lang?: string; limit?: number; offset?: number }
 ): Promise<ChapterList> {
-  const queryParams = params ? toParams(params as any) : undefined;
+  const queryParams = params ? toParams(params) : undefined;
   return apiGet<ChapterList>(`/series/${id}/chapters`, queryParams);
+}
+
+/**
+ * Fetch metadata for a specific chapter.
+ */
+export function getChapter(chapterId: string): Promise<Chapter> {
+  return apiGet<Chapter>(`/series/chapters/${chapterId}`);
 }
 
 /**

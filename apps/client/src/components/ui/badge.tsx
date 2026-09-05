@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 
-type BadgeVariant = 'default' | 'accent' | 'muted';
+export type BadgeVariant = 'default' | 'accent' | 'muted';
 
-interface BadgeProps {
+export interface BadgeProps {
   variant?: BadgeVariant;
   children: ReactNode;
   className?: string;

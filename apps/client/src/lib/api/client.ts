@@ -1,4 +1,7 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+const API_BASE_URL =
+  (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_URL)
+    ? process.env.NEXT_PUBLIC_API_URL
+    : 'http://localhost:3001';
 
 export class ApiError extends Error {
   constructor(
@@ -17,7 +20,7 @@ export class ApiError extends Error {
  */
 export async function apiGet<T>(
   path: string,
-  params?: Record<string, string | number | undefined>,
+  params?: Record<string, string | number | boolean | undefined>,
 ): Promise<T> {
   const url = new URL(path, API_BASE_URL);
 

@@ -17,8 +17,13 @@ vi.mock('next/navigation', () => ({
 
 // Mock next-intl routing
 vi.mock('@/i18n/navigation', () => ({
-  Link: ({ children, href, className, ...props }: any) => {
-    return React.createElement('a', { href, className, ...props }, children as React.ReactNode);
+  Link: ({
+    children,
+    href,
+    className,
+    ...props
+  }: React.AnchorHTMLAttributes<HTMLAnchorElement> & { href: string }) => {
+    return React.createElement('a', { href, className, ...props }, children);
   },
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
   usePathname: () => '/',
@@ -29,7 +34,7 @@ vi.mock('@/i18n/navigation', () => ({
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
   useLocale: () => 'es',
-  NextIntlClientProvider: ({ children }: any) => children,
+  NextIntlClientProvider: ({ children }: { children?: React.ReactNode }) => children,
 }));
 
 // Mock animejs to prevent issues in jsdom
@@ -40,3 +45,18 @@ vi.mock('animejs', () => ({
   })),
   default: vi.fn(),
 }));
+
+// Mock window.matchMedia for JSDOM
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: vi.fn().mockImplementation((query) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});

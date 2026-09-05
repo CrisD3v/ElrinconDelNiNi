@@ -64,8 +64,8 @@ export class SeriesController {
   @ApiOperation({ summary: 'Get detailed information about a specific series' })
   @ApiParam({ name: 'id', description: 'MangaDex Series ID' })
   @ApiResponse({ status: 200, description: 'Series details' })
-  getSeriesDetail(@Param('id') id: string) {
-    return this.seriesService.getSeriesDetail(id);
+  getSeriesDetail(@Param('id') id: string, @Query('lang') lang?: string) {
+    return this.seriesService.getSeriesDetail(id, lang);
   }
 
   @Get(':id/chapters')
@@ -81,9 +81,19 @@ export class SeriesController {
     return this.seriesService.getSeriesChapters(id, query);
   }
 
+  @Get('chapters/:chapterId')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(3600000) // Cache for 1 hour
+  @ApiOperation({ summary: 'Get details for a specific chapter' })
+  @ApiParam({ name: 'chapterId', description: 'MangaDex Chapter ID' })
+  @ApiResponse({ status: 200, description: 'Chapter details' })
+  getChapter(@Param('chapterId') chapterId: string) {
+    return this.seriesService.getChapter(chapterId);
+  }
+
   @Get('chapters/:chapterId/pages')
   @UseInterceptors(CacheInterceptor)
-  @CacheTTL(900000) // Cache for 15 minutes (at-home URLs are temporary)
+  @CacheTTL(60000) // Cache for 1 minute (MangaDex At-Home nodes are temporary and dynamic)
   @ApiOperation({ summary: 'Get page images for a specific chapter' })
   @ApiParam({ name: 'chapterId', description: 'MangaDex Chapter ID' })
   @ApiResponse({ status: 200, description: 'List of page image URLs' })

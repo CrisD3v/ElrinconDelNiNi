@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@elrincondelnini/types": "workspace:*",
+    "@js-temporal/polyfill": "^0.5.1",
     "@nestjs/axios": "^12.0.0",
     "@nestjs/cache-manager": "^12.0.0",
     "@nestjs/common": "^11.0.1",

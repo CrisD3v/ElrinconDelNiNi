@@ -7,7 +7,11 @@ export enum SeriesLanguage {
 }
 
 export class SeriesQueryDto {
-  @ApiProperty({ description: 'Language for series content', enum: SeriesLanguage, example: 'es' })
+  @ApiProperty({
+    description: 'Language for series content',
+    enum: SeriesLanguage,
+    example: 'es',
+  })
   @IsNotEmpty()
   @IsEnum(SeriesLanguage, { message: 'lang must be either es or en' })
   lang: SeriesLanguage;

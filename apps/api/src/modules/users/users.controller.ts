@@ -1,3 +1,4 @@
+import * as path from 'path';
 import {
   Controller,
   Get,
@@ -12,7 +13,13 @@ import {
   Delete,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { CurrentUser } from '#common/decorators/index.js';
 import type { AuthenticatedUser } from '#common/types/index.js';
 import { SupabaseAuthGuard } from '#modules/auth/index.js';
@@ -35,6 +42,11 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'The user profile data' })
   async getMe(@CurrentUser() authUser: AuthenticatedUser) {
     const user = await this.usersService.findOrCreate(authUser);
+    const createdAtStr =
+      typeof (user.createdAt as any)?.toString === 'function'
+        ? (user.createdAt as any).toString()
+        : String(user.createdAt);
+
     return {
       id: user.id,
       email: user.email,
@@ -44,7 +56,7 @@ export class UsersController {
       description: user.description,
       badges: user.badges,
       locale: user.locale,
-      createdAt: user.createdAt.toISOString(),
+      createdAt: createdAtStr,
     };
   }
 
@@ -64,7 +76,8 @@ export class UsersController {
   async updateProfile(
     @CurrentUser() authUser: AuthenticatedUser,
     @Body() body: UpdateProfileDto,
-    @UploadedFiles() files: { profileImage?: any[]; bannerImage?: any[] },
+    @UploadedFiles()
+    files?: { profileImage?: any[]; bannerImage?: any[] },
   ): Promise<any> {
     const user = await this.usersService.findOrCreate(authUser);
     let profileImageUrl = user.profileImage;
@@ -75,38 +88,65 @@ export class UsersController {
     const MAX_BANNER_SIZE =
       parseInt(process.env.MAX_BANNER_IMAGE_SIZE_MB || '5') * 1024 * 1024;
 
-    if (files.profileImage?.[0]) {
+    if (body.removeProfileImage === 'true' || body.removeProfileImage === true) {
+      profileImageUrl = null;
+    }
+
+    if (body.removeBanner === 'true' || body.removeBanner === true) {
+      bannerImageUrl = null;
+    }
+
+    if (files?.profileImage?.[0]) {
       const file = files.profileImage[0];
       if (file.size > MAX_PROFILE_SIZE)
         throw new BadRequestException(
           `Profile image exceeds size limit of ${process.env.MAX_PROFILE_IMAGE_SIZE_MB}MB`,
         );
+      const ext = file.originalname ? path.extname(file.originalname) : '';
       profileImageUrl = await this.storageService.uploadFile(
         'ernn-users',
-        `avatars/${user.id}-${Date.now()}`,
+        `avatars/${user.id}-${Date.now()}${ext}`,
         file,
       );
     }
 
-    if (files.bannerImage?.[0]) {
+    if (files?.bannerImage?.[0]) {
       const file = files.bannerImage[0];
       if (file.size > MAX_BANNER_SIZE)
         throw new BadRequestException(
           `Banner image exceeds size limit of ${process.env.MAX_BANNER_IMAGE_SIZE_MB}MB`,
         );
+      const ext = file.originalname ? path.extname(file.originalname) : '';
       bannerImageUrl = await this.storageService.uploadFile(
         'ernn-users',
-        `banners/${user.id}-${Date.now()}`,
+        `banners/${user.id}-${Date.now()}${ext}`,
         file,
       );
     }
 
-    return this.usersService.updateProfile(user.id, {
+    const updatedUser = await this.usersService.updateProfile(user.id, {
       description: body.description,
       displayName: body.displayName,
       profileImage: profileImageUrl,
       bannerImage: bannerImageUrl,
     });
+
+    const createdAtStr =
+      typeof (updatedUser.createdAt as any)?.toString === 'function'
+        ? (updatedUser.createdAt as any).toString()
+        : String(updatedUser.createdAt);
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      displayName: updatedUser.displayName,
+      profileImage: updatedUser.profileImage,
+      bannerImage: updatedUser.bannerImage,
+      description: updatedUser.description,
+      badges: updatedUser.badges,
+      locale: updatedUser.locale,
+      createdAt: createdAtStr,
+    };
   }
 
   @Post(':id/follow')

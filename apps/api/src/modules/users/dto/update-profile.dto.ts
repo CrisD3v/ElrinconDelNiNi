@@ -35,4 +35,20 @@ export class UpdateProfileDto {
   })
   @IsOptional()
   bannerImage?: any;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    description: 'Flag to remove the banner image',
+    example: 'true',
+  })
+  @IsOptional()
+  removeBanner?: string | boolean;
+
+  @ApiPropertyOptional({
+    type: 'string',
+    description: 'Flag to remove the profile image',
+    example: 'true',
+  })
+  @IsOptional()
+  removeProfileImage?: string | boolean;
 }

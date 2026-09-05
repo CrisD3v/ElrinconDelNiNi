@@ -10,7 +10,13 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiConsumes,
+} from '@nestjs/swagger';
 import { CurrentUser } from '#common/decorators/index.js';
 import type { AuthenticatedUser } from '#common/types/index.js';
 import { SupabaseAuthGuard } from '#modules/auth/index.js';

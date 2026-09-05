@@ -5,7 +5,8 @@
     "favorites": "Favorites",
     "search": "Search series...",
     "login": "Sign In",
-    "menu": "Menu"
+    "menu": "Menu",
+    "loading": "Loading..."
   },
   "home": {
     "hero": {
@@ -15,7 +16,8 @@
     "sections": {
       "releases": "Latest Releases",
       "top": "Top Series",
-      "day": "Daily Series"
+      "day": "Daily Series",
+      "allSeries": "All Series"
     },
     "viewAll": "View all"
   },

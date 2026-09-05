@@ -305,7 +305,7 @@ export class SeriesService {
 
       return {
         series,
-        total: validItems.length,
+        total: data.total || validItems.length,
         limit: requestedLimit,
         offset: params.offset || 0,
       };

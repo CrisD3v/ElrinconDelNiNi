@@ -5,7 +5,8 @@
     "favorites": "Favoritos",
     "search": "Buscar series...",
     "login": "Iniciar Sesión",
-    "menu": "Menú"
+    "menu": "Menú",
+    "loading": "Cargando..."
   },
   "home": {
     "hero": {
@@ -15,7 +16,8 @@
     "sections": {
       "releases": "Últimos Lanzamientos",
       "top": "Top Series",
-      "day": "Series del Día"
+      "day": "Series del Día",
+      "allSeries": "Todas las Series"
     },
     "viewAll": "Ver todo"
   },

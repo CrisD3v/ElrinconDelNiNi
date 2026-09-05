@@ -10,15 +10,19 @@ import { Button } from '@/components/ui/button';
 import type { SeriesCategory } from '@/lib/api/types';
 import { use } from 'react';
 
-const VALID_CATEGORIES: SeriesCategory[] = ['release', 'top', 'day'];
+const VALID_CATEGORIES: SeriesCategory[] = ['release', 'top', 'day', 'all'];
 const ITEMS_PER_PAGE = 20;
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
+export default function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { category } = use(params);
+  const { q } = use(searchParams) || {};
+  const query = typeof q === 'string' ? q : undefined;
+  
   const locale = useLocale();
   const t = useTranslations('home');
   const tSeries = useTranslations('series');
@@ -33,6 +37,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     locale,
     ITEMS_PER_PAGE,
     offset,
+    query,
   );
 
   // Validate category
@@ -48,6 +53,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
     release: 'releases',
     top: 'top',
     day: 'day',
+    all: 'allSeries',
   };
 
   const currentPage = Math.floor(offset / ITEMS_PER_PAGE) + 1;

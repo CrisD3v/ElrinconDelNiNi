@@ -73,6 +73,7 @@ const categoryFetchers = {
   release: getReleaseSeries,
   top: getTopSeries,
   day: getDaySeries,
+  all: searchSeries,
 } as const;
 
 /**

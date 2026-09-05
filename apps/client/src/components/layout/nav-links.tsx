@@ -6,7 +6,7 @@ import { Home, BookOpen, Heart } from 'lucide-react';
 
 const links = [
   { href: '/' as const, labelKey: 'home', icon: Home },
-  { href: '/series/release' as const, labelKey: 'series', icon: BookOpen },
+  { href: '/series/all' as const, labelKey: 'series', icon: BookOpen },
   { href: '/favorites' as const, labelKey: 'favorites', icon: Heart },
 ];
 

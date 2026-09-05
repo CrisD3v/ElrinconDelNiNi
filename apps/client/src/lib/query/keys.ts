@@ -18,8 +18,8 @@ export const seriesKeys = {
     [...seriesKeys.lists(), 'search', lang, title] as const,
 
   /** Key for paginated category list */
-  categoryPaginated: (category: SeriesCategory, lang: string, offset: number) =>
-    [...seriesKeys.category(category, lang), offset] as const,
+  categoryPaginated: (category: SeriesCategory, lang: string, offset: number, title?: string) =>
+    [...seriesKeys.category(category, lang), offset, title] as const,
 
   /** Key for a single series detail */
   detail: (id: string) => [...seriesKeys.all, 'detail', id] as const,

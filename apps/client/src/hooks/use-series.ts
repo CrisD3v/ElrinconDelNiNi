@@ -7,6 +7,7 @@ import {
   getTopSeries,
   getDaySeries,
   getSeriesByCategory,
+  searchSeries,
 } from '@/lib/api/series';
 import type { SeriesCategory, SeriesQueryParams } from '@/lib/api/types';
 
@@ -51,14 +52,32 @@ export function useCategorySeries(
   lang: string,
   limit = 20,
   offset = 0,
+  title?: string,
 ) {
   return useQuery({
-    queryKey: seriesKeys.categoryPaginated(category, lang, offset),
+    queryKey: seriesKeys.categoryPaginated(category, lang, offset, title),
     queryFn: () =>
       getSeriesByCategory(category, {
         lang: lang as SeriesQueryParams['lang'],
         limit,
         offset,
+        title,
       }),
+  });
+}
+
+/**
+ * Fetch series by search query
+ */
+export function useSearchSeries(lang: string, title: string, limit = 5) {
+  return useQuery({
+    queryKey: seriesKeys.search(lang, title),
+    queryFn: () =>
+      searchSeries({
+        lang: lang as SeriesQueryParams['lang'],
+        limit,
+        title,
+      }),
+    enabled: title.trim().length > 0,
   });
 }

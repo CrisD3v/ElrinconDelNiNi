@@ -58,7 +58,7 @@ export interface SeriesList {
   offset: number;
 }
 
-export type SeriesCategory = 'release' | 'top' | 'day';
+export type SeriesCategory = 'release' | 'top' | 'day' | 'all';
 
 export interface SeriesQueryParams {
   lang: Locale;
@@ -97,6 +97,8 @@ export interface CommentUser {
   id: string;
   displayName: string;
   profileImage?: string | null;
+  bannerImage?: string | null;
+  description?: string | null;
   badges: string[];
 }
 

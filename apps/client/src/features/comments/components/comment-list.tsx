@@ -8,11 +8,10 @@ import { CommentItem } from './comment-item';
 import { CommentReplyList } from './comment-reply-list';
 
 interface CommentListProps {
-  mangaId?: string;
-  chapterId?: string;
+  commentsData: ReturnType<typeof useComments>;
 }
 
-export function CommentList({ mangaId, chapterId }: CommentListProps) {
+export function CommentList({ commentsData }: CommentListProps) {
   const t = useTranslations('comments');
   const {
     comments,
@@ -28,7 +27,7 @@ export function CommentList({ mangaId, chapterId }: CommentListProps) {
     voteComment,
     reactToComment,
     reportCommentAction,
-  } = useComments({ mangaId, chapterId });
+  } = commentsData;
 
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
 
@@ -119,6 +118,7 @@ export function CommentList({ mangaId, chapterId }: CommentListProps) {
                 setReplyingToId(null);
               }}
               onCancelReply={() => setReplyingToId(null)}
+              onReply={handleReply}
             />
           </div>
         ))}

@@ -16,7 +16,8 @@ interface CommentSectionProps {
 export function CommentSection({ mangaId, chapterId, compact = false }: CommentSectionProps) {
   const t = useTranslations('comments');
   const { profile, session } = useAuth();
-  const { addComment, total } = useComments({ mangaId, chapterId });
+  const commentsData = useComments({ mangaId, chapterId });
+  const { addComment, total } = commentsData;
 
   return (
     <div className={compact ? 'flex flex-col h-full' : ''}>
@@ -73,7 +74,7 @@ export function CommentSection({ mangaId, chapterId, compact = false }: CommentS
 
       {/* List */}
       <div className={compact ? 'flex-1 overflow-y-auto px-4 pb-4' : ''}>
-        <CommentList mangaId={mangaId} chapterId={chapterId} />
+        <CommentList commentsData={commentsData} />
       </div>
     </div>
   );

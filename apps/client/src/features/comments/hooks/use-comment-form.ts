@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { searchUsers } from '@/lib/api/comments';
 import type { CommentUser } from '@elrincondelnini/types';
 
@@ -11,10 +11,11 @@ interface UseCommentFormOptions {
     image: File | null;
   }) => Promise<void>;
   onCancel?: () => void;
+  initialContent?: string;
 }
 
-export function useCommentForm({ onSubmit, onCancel }: UseCommentFormOptions) {
-  const [content, setContent] = useState('');
+export function useCommentForm({ onSubmit, onCancel, initialContent = '' }: UseCommentFormOptions) {
+  const [content, setContent] = useState(initialContent);
   const [isSpoiler, setIsSpoiler] = useState(false);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -58,7 +59,13 @@ export function useCommentForm({ onSubmit, onCancel }: UseCommentFormOptions) {
       setContent(newContent);
       setShowMentions(false);
       setMentionResults([]);
-      textareaRef.current?.focus();
+      
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+          textareaRef.current.setSelectionRange(newContent.length, newContent.length);
+        }
+      }, 0);
     },
     [content],
   );
@@ -114,6 +121,14 @@ export function useCommentForm({ onSubmit, onCancel }: UseCommentFormOptions) {
     setError(null);
     onCancel?.();
   }, [onCancel]);
+
+  useEffect(() => {
+    if (initialContent && textareaRef.current) {
+      const len = initialContent.length;
+      textareaRef.current.focus();
+      textareaRef.current.setSelectionRange(len, len);
+    }
+  }, [initialContent]);
 
   return {
     content,

@@ -68,7 +68,7 @@ export function CommentReactionPicker({
 
       {/* Emoji picker dropdown */}
       {open && (
-        <div className="absolute bottom-full mb-2 left-0 z-50 p-2 rounded-xl border border-dark-600/60 bg-dark-900/95 backdrop-blur-sm shadow-2xl">
+        <div className="absolute bottom-full mb-2 left-0 z-50 p-2 rounded-xl border border-dark-600/60 bg-dark-900/95 backdrop-blur-sm shadow-2xl w-max">
           <div className="grid grid-cols-5 gap-1">
             {EMOJIS.map((emoji) => (
               <button

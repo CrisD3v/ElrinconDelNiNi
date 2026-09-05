@@ -13,36 +13,20 @@ export function CommentSpoilerWrapper({ children, isSpoiler }: CommentSpoilerWra
   if (!isSpoiler) return <>{children}</>;
 
   return (
-    <div className="relative">
+    <div
+      onClick={() => setRevealed((prev) => !prev)}
+      className="relative cursor-pointer group inline-block"
+      title={revealed ? "Click para ocultar spoiler" : "Click para revelar spoiler"}
+    >
       <div
-        className={`transition-all duration-300 ${
-          revealed ? 'blur-none' : 'blur-sm select-none pointer-events-none'
+        className={`transition-all duration-300 ease-out inline-block rounded-md ${
+          revealed
+            ? 'blur-none opacity-100'
+            : 'blur-[6px] opacity-70 group-hover:blur-[4px] group-hover:opacity-90 bg-dark-600/30 text-transparent'
         }`}
       >
         {children}
       </div>
-      {!revealed && (
-        <button
-          onClick={() => setRevealed(true)}
-          className="absolute inset-0 flex flex-col items-center justify-center gap-2 group"
-          aria-label="Revelar spoiler"
-        >
-          <span className="flex items-center gap-1.5 text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full bg-gold-500/20 border border-gold-500/40 text-gold-400 group-hover:bg-gold-500/30 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            SPOILER — click para revelar
-          </span>
-        </button>
-      )}
-      {revealed && (
-        <button
-          onClick={() => setRevealed(false)}
-          className="mt-1 text-xs text-text-secondary hover:text-gold-400 transition-colors"
-        >
-          Ocultar spoiler
-        </button>
-      )}
     </div>
   );
 }

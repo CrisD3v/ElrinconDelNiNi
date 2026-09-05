@@ -16,6 +16,7 @@ interface CommentReplyListProps {
   onDelete: (commentId: string, parentId?: string) => Promise<void>;
   onAddReply: (payload: { content: string; isSpoiler: boolean; image: File | null; parentId: string }) => Promise<void>;
   onCancelReply: () => void;
+  onReply: (comment: Comment) => void;
 }
 
 export function CommentReplyList({
@@ -28,11 +29,14 @@ export function CommentReplyList({
   onDelete,
   onAddReply,
   onCancelReply,
+  onReply,
 }: CommentReplyListProps) {
   const t = useTranslations('comments');
   const [expanded, setExpanded] = useState(false);
   const hasReplies = comment.replies.length > 0;
-  const isReplyingHere = replyingToId === comment.id;
+  const isReplyingHere = replyingToId === comment.id || comment.replies.some(r => r.id === replyingToId);
+  const replyingToComment = isReplyingHere && replyingToId !== comment.id ? comment.replies.find(r => r.id === replyingToId) : null;
+  const initialContent = replyingToComment ? `@${replyingToComment.user?.displayName} ` : '';
 
   return (
     <div className="ml-11">
@@ -53,29 +57,36 @@ export function CommentReplyList({
             </button>
           )}
 
-          {expanded && (
-            <div className="space-y-4 border-l-2 border-dark-700/50 pl-4 mb-3">
-              {comment.replies.map((reply) => (
-                <CommentItem
-                  key={reply.id}
-                  comment={reply}
-                  isReply
-                  parentId={comment.id}
-                  onVote={onVote}
-                  onReact={onReact}
-                  onReport={onReport}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                />
-              ))}
-              <button
-                onClick={() => setExpanded(false)}
-                className="text-xs text-text-muted hover:text-text-secondary transition-colors"
-              >
-                {t('collapseReplies')}
-              </button>
+          <div
+            className={`grid transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)] ${
+              expanded ? 'grid-rows-[1fr] opacity-100 mb-3' : 'grid-rows-[0fr] opacity-0 mb-0'
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="space-y-4 border-l-2 border-dark-700/50 pl-4">
+                {comment.replies.map((reply) => (
+                  <CommentItem
+                    key={reply.id}
+                    comment={reply}
+                    isReply
+                    parentId={comment.id}
+                    onVote={onVote}
+                    onReact={onReact}
+                    onReport={onReport}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                    onReply={onReply}
+                  />
+                ))}
+                <button
+                  onClick={() => setExpanded(false)}
+                  className="text-xs text-text-muted hover:text-text-secondary transition-colors"
+                >
+                  {t('collapseReplies')}
+                </button>
+              </div>
             </div>
-          )}
+          </div>
         </>
       )}
 
@@ -87,7 +98,8 @@ export function CommentReplyList({
               onAddReply({ ...payload, parentId: comment.id })
             }
             onCancel={onCancelReply}
-            placeholder={t('replyPlaceholder', { name: comment.user?.displayName })}
+            placeholder={t('replyPlaceholder', { name: replyingToComment ? replyingToComment.user?.displayName : comment.user?.displayName })}
+            initialContent={initialContent}
             compact
             autoFocus
           />

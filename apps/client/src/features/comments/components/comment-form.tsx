@@ -10,6 +10,7 @@ interface CommentFormProps {
   placeholder?: string;
   compact?: boolean;
   autoFocus?: boolean;
+  initialContent?: string;
 }
 
 export function CommentForm({
@@ -18,6 +19,7 @@ export function CommentForm({
   placeholder,
   compact = false,
   autoFocus = false,
+  initialContent = '',
 }: CommentFormProps) {
   const t = useTranslations('comments');
   const {
@@ -38,7 +40,7 @@ export function CommentForm({
     handleCancel,
     setIsSpoiler,
     setShowMentions,
-  } = useCommentForm({ onSubmit, onCancel });
+  } = useCommentForm({ onSubmit, onCancel, initialContent });
 
   return (
     <form onSubmit={handleSubmit} className="relative">

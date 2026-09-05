@@ -10,6 +10,27 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 const REPORT_AUTO_HIDE_THRESHOLD = 5;
 const DEFAULT_PAGE_SIZE = 20;
 
+async function toArray<T>(iterable: any): Promise<T[]> {
+  if (Array.isArray(iterable)) return iterable;
+  if (!iterable) return [];
+  if (typeof iterable.all === 'function') {
+    return iterable.all();
+  }
+  if (typeof iterable.many === 'function') {
+    return iterable.many();
+  }
+  const result: T[] = [];
+  if (typeof iterable[Symbol.asyncIterator] === 'function') {
+    for await (const item of iterable) result.push(item);
+    return result;
+  }
+  if (typeof iterable[Symbol.iterator] === 'function') {
+    for (const item of iterable) result.push(item);
+    return result;
+  }
+  return [iterable as T];
+}
+
 @Injectable()
 export class CommentsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -33,13 +54,13 @@ export class CommentsService {
     const user = await this.prisma.db.orm.public.User.where({ id: c.userId }).first();
 
     // Counts
-    const likes: any[] = (await this.prisma.db.orm.public.CommentLike.where({ commentId: c.id })) as any;
+    const likes: any[] = await toArray(await this.prisma.db.orm.public.CommentLike.where({ commentId: c.id }));
     const likesCount = likes.filter((l) => l.value === 1).length;
     const dislikesCount = likes.filter((l) => l.value === -1).length;
     const myLike = currentUserId ? likes.find((l) => l.userId === currentUserId) : null;
 
     // Reactions grouped by emoji
-    const rawReactions: any[] = (await this.prisma.db.orm.public.CommentReaction.where({ commentId: c.id })) as any;
+    const rawReactions: any[] = await toArray(await this.prisma.db.orm.public.CommentReaction.where({ commentId: c.id }));
     const emojiMap = new Map<string, { count: number; reactedByMe: boolean }>();
     for (const r of rawReactions) {
       const existing = emojiMap.get(r.emoji) ?? { count: 0, reactedByMe: false };
@@ -53,7 +74,7 @@ export class CommentsService {
     }));
 
     // Report count
-    const reports: any[] = (await this.prisma.db.orm.public.CommentReport.where({ commentId: c.id })) as any;
+    const reports: any[] = await toArray(await this.prisma.db.orm.public.CommentReport.where({ commentId: c.id }));
 
     return {
       id: c.id,
@@ -63,12 +84,14 @@ export class CommentsService {
       isHidden: c.isHidden,
       isPinned: c.isPinned,
       parentId: c.parentId,
-      createdAt: c.createdAt?.toString?.() ?? String(c.createdAt),
-      updatedAt: c.updatedAt?.toString?.() ?? String(c.updatedAt),
+      createdAt: c.createdAt?.toString(),
+      updatedAt: c.updatedAt?.toString(),
       user: {
         id: user?.id,
         displayName: user?.displayName,
         profileImage: user?.profileImage,
+        bannerImage: user?.bannerImage,
+        description: user?.description,
         badges: user?.badges,
       },
       likesCount,
@@ -88,12 +111,18 @@ export class CommentsService {
     currentUserId?: string,
   ) {
     // Fetch top-level comments (no parentId)
-    const allComments: any[] = (await this.prisma.db.orm.public.Comment.where(filter)) as any;
+    const allComments: any[] = await toArray(await this.prisma.db.orm.public.Comment.where(filter));
+
+    const getMs = (date: any) => {
+      if (!date) return 0;
+      if (typeof date.epochMilliseconds === 'number') return date.epochMilliseconds;
+      return new Date(date.toString()).getTime();
+    };
 
     // Sort by createdAt desc (newest first), filter top-level only
     const topLevel = allComments
       .filter((c) => !c.parentId)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort((a, b) => getMs(b.createdAt) - getMs(a.createdAt));
 
     // Cursor pagination
     let startIdx = 0;
@@ -113,7 +142,7 @@ export class CommentsService {
         // Replies: children of this comment
         const rawReplies = allComments
           .filter((r) => r.parentId === c.id)
-          .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+          .sort((a, b) => getMs(a.createdAt) - getMs(b.createdAt));
         enrichedComment.replies = await Promise.all(
           rawReplies.map((r) => this.enrichComment(r, currentUserId)),
         );

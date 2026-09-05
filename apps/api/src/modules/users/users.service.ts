@@ -9,6 +9,27 @@ import { PrismaService } from '../../prisma/prisma.service.js';
 
 type User = FieldOutputTypes['public']['User'];
 
+async function toArray<T>(iterable: any): Promise<T[]> {
+  if (Array.isArray(iterable)) return iterable;
+  if (!iterable) return [];
+  if (typeof iterable.all === 'function') {
+    return iterable.all();
+  }
+  if (typeof iterable.many === 'function') {
+    return iterable.many();
+  }
+  const result: T[] = [];
+  if (typeof iterable[Symbol.asyncIterator] === 'function') {
+    for await (const item of iterable) result.push(item);
+    return result;
+  }
+  if (typeof iterable[Symbol.iterator] === 'function') {
+    for (const item of iterable) result.push(item);
+    return result;
+  }
+  return [iterable as T];
+}
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -91,9 +112,9 @@ export class UsersService {
   }
 
   async getFollowers(userId: string): Promise<any[]> {
-    const follows: any[] = (await this.prisma.db.orm.public.Follow.where({
+    const follows: any[] = await toArray(await this.prisma.db.orm.public.Follow.where({
       followingId: userId,
-    })) as any;
+    }));
     // Prisma Next does not seem to include relations in .many() by default the same way
     // Assuming simple mapping or fetching users manually
     const followerIds = follows.map((f) => f.followerId);
@@ -118,9 +139,9 @@ export class UsersService {
   }
 
   async getFollowing(userId: string): Promise<any[]> {
-    const follows: any[] = (await this.prisma.db.orm.public.Follow.where({
+    const follows: any[] = await toArray(await this.prisma.db.orm.public.Follow.where({
       followerId: userId,
-    })) as any;
+    }));
     const followingIds = follows.map((f) => f.followingId);
     if (!followingIds.length) return [];
 

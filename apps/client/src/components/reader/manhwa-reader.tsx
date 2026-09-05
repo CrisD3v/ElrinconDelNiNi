@@ -1,9 +1,154 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useReaderSettings } from '@/hooks/use-reader-settings';
+import { useTranslations } from 'next-intl';
+import { useReaderSettings, type ImageQuality } from '@/hooks/use-reader-settings';
 import { ReaderToolbar } from './reader-toolbar';
 import { ChapterNavigation } from './chapter-navigation';
+
+interface ChapterPageProps {
+  index: number;
+  totalImages: number;
+  originalUrl: string;
+  dataSaverUrl?: string;
+  isInitialEager: boolean;
+  preferredQuality: ImageQuality;
+  chapterId: string;
+  onLoaded: (index: number) => void;
+}
+
+function ChapterPage({
+  index,
+  totalImages,
+  originalUrl,
+  dataSaverUrl,
+  isInitialEager,
+  preferredQuality,
+  chapterId,
+  onLoaded,
+}: ChapterPageProps) {
+  const t = useTranslations('reader');
+
+  const getInitialUrl = useCallback(() => {
+    if (preferredQuality === 'dataSaver' && dataSaverUrl) {
+      return dataSaverUrl;
+    }
+    return originalUrl;
+  }, [preferredQuality, dataSaverUrl, originalUrl]);
+
+  const initialUrl = getInitialUrl();
+  const [prevInitialUrl, setPrevInitialUrl] = useState(initialUrl);
+  const [currentUrl, setCurrentUrl] = useState<string>(initialUrl);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [isFailed, setIsFailed] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
+
+  // Sync if quality settings change
+  if (prevInitialUrl !== initialUrl) {
+    setPrevInitialUrl(initialUrl);
+    setCurrentUrl(initialUrl);
+    setIsLoaded(false);
+    setIsFailed(false);
+    setRetryCount(0);
+  }
+
+  const handleImageLoad = useCallback(() => {
+    setIsLoaded(true);
+    setIsFailed(false);
+    onLoaded(index);
+  }, [index, onLoaded]);
+
+  const handleImageError = useCallback(() => {
+    // 1. If currently using originalUrl and data-saver is available, switch to data-saver
+    if (currentUrl === originalUrl && dataSaverUrl) {
+      setCurrentUrl(dataSaverUrl);
+      return;
+    }
+
+    // 2. If data-saver also encountered an error (or no data-saver), auto-retry up to 2 times with a slight delay
+    if (retryCount < 2) {
+      const timer = setTimeout(() => {
+        setRetryCount((prev) => prev + 1);
+        const targetBase = dataSaverUrl || originalUrl;
+        setCurrentUrl(`${targetBase}?retry=${Date.now()}`);
+      }, 750 * (retryCount + 1));
+      return () => clearTimeout(timer);
+    }
+
+    // 3. Mark as failed after all automatic recovery attempts have exhausted
+    setIsFailed(true);
+    onLoaded(index); // Mark loaded in progress bar so reader doesn't hang
+  }, [currentUrl, originalUrl, dataSaverUrl, retryCount, index, onLoaded]);
+
+  const handleManualRetry = () => {
+    setIsFailed(false);
+    setIsLoaded(false);
+    setRetryCount((prev) => prev + 1);
+    const targetBase = dataSaverUrl || originalUrl;
+    setCurrentUrl(`${targetBase}?retry=${Date.now()}`);
+  };
+
+  return (
+    <div
+      key={`${chapterId}-page-${index}`}
+      className="relative w-full bg-dark-950 overflow-hidden min-h-[350px]"
+    >
+      {/* Skeleton shimmer visible until loaded */}
+      {!isLoaded && !isFailed && (
+        <div
+          className="w-full skeleton-shimmer flex items-center justify-center"
+          style={{ aspectRatio: '2/3', minHeight: '350px' }}
+        >
+          <span className="text-text-muted text-xs font-semibold tracking-wider">
+            {index + 1} / {totalImages}
+          </span>
+        </div>
+      )}
+
+      {/* Failed state with retry button */}
+      {isFailed && (
+        <div className="w-full flex items-center justify-center bg-dark-900/60 border border-dark-800 py-16 px-4 my-2 rounded-xl">
+          <div className="text-center">
+            <p className="text-text-muted text-sm mb-3">
+              {t('imageError', { number: index + 1 })}
+            </p>
+            <button
+              type="button"
+              onClick={handleManualRetry}
+              className="px-4 py-2 rounded-lg bg-accent/20 border border-accent/40 text-accent text-xs font-bold hover:bg-accent hover:text-dark-950 transition-colors cursor-pointer shadow-sm"
+            >
+              {t('retryImage')}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Actual image */}
+      {!isFailed && (
+        <img
+          key={currentUrl}
+          src={currentUrl}
+          alt={t('pageNumber', { number: index + 1 })}
+          loading={isInitialEager ? 'eager' : 'lazy'}
+          decoding="async"
+          referrerPolicy="no-referrer"
+          ref={(img) => {
+            if (img && img.complete && img.naturalWidth > 0 && !isLoaded) {
+              handleImageLoad();
+            }
+          }}
+          className={`w-full block transition-opacity duration-300 ease-out ${
+            isLoaded
+              ? 'opacity-100 relative'
+              : 'opacity-0 absolute inset-0 pointer-events-none'
+          }`}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
+        />
+      )}
+    </div>
+  );
+}
 
 interface ManhwaReaderProps {
   pages: string[];
@@ -24,11 +169,17 @@ export function ManhwaReader({
   nextChapterId,
   currentChapterNumber,
 }: ManhwaReaderProps) {
-  const { brightness, pageWidth, isHydrated, setBrightness, setPageWidth } =
-    useReaderSettings();
+  const {
+    brightness,
+    pageWidth,
+    quality,
+    isHydrated,
+    setBrightness,
+    setPageWidth,
+    setQuality,
+  } = useReaderSettings();
+
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
-  const [failedImages, setFailedImages] = useState<Set<number>>(new Set());
-  const [useFallback, setUseFallback] = useState<Set<number>>(new Set());
   const [isFinishedLoading, setIsFinishedLoading] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,31 +198,13 @@ export function ManhwaReader({
     });
   }, []);
 
-  const handleImageError = useCallback(
-    (index: number) => {
-      // If we haven't tried data-saver fallback yet and it exists, try fallback
-      if (!useFallback.has(index) && pagesDataSaver[index]) {
-        setUseFallback((prev) => new Set(prev).add(index));
-        return;
-      }
-
-      setFailedImages((prev) => new Set(prev).add(index));
-      // Mark as loaded so progress bar doesn't hang indefinitely
-      setLoadedImages((prev) => new Set(prev).add(index));
-    },
-    [pagesDataSaver, useFallback]
-  );
-
-  // Check cached images on mount and on reload
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const imgElements = containerRef.current.querySelectorAll('img');
-    imgElements.forEach((img, index) => {
-      if (img.complete && img.naturalWidth > 0) {
-        handleImageLoad(index);
-      }
-    });
-  }, [pages, handleImageLoad]);
+  const [prevIsAllLoaded, setPrevIsAllLoaded] = useState(isAllLoaded);
+  if (prevIsAllLoaded !== isAllLoaded) {
+    setPrevIsAllLoaded(isAllLoaded);
+    if (!isAllLoaded) {
+      setIsFinishedLoading(false);
+    }
+  }
 
   // Keep progress bar at 100% briefly before fading out smoothly
   useEffect(() => {
@@ -80,14 +213,13 @@ export function ManhwaReader({
         setIsFinishedLoading(true);
       }, 700);
       return () => clearTimeout(timer);
-    } else {
-      setIsFinishedLoading(false);
     }
   }, [isAllLoaded]);
 
   // Use defaults during SSR/hydration
   const activeBrightness = isHydrated ? brightness : 100;
   const activePageWidth = isHydrated ? pageWidth : 600;
+  const activeQuality = isHydrated ? quality : 'high';
 
   return (
     <div className="min-h-screen bg-dark-950 flex flex-col">
@@ -107,8 +239,10 @@ export function ManhwaReader({
       <ReaderToolbar
         brightness={activeBrightness}
         pageWidth={activePageWidth}
+        quality={activeQuality}
         onBrightnessChange={setBrightness}
         onPageWidthChange={setPageWidth}
+        onQualityChange={setQuality}
       />
 
       {/* Images Container */}
@@ -120,89 +254,19 @@ export function ManhwaReader({
           filter: `brightness(${activeBrightness / 100})`,
         }}
       >
-        {pages.map((url, index) => {
-          const isLoaded = loadedImages.has(index);
-          const isFailed = failedImages.has(index);
-          const imageUrl =
-            useFallback.has(index) && pagesDataSaver[index] ? pagesDataSaver[index] : url;
-
-          return (
-            <div
-              key={`${chapterId}-page-${index}`}
-              className="relative w-full bg-dark-950 overflow-hidden"
-            >
-              {/* Skeleton shimmer (visible until image loads) */}
-              {!isLoaded && (
-                <div
-                  className="w-full skeleton-shimmer flex items-center justify-center"
-                  style={{ aspectRatio: '2/3', minHeight: '300px' }}
-                >
-                  <span className="text-text-muted text-xs font-semibold tracking-wider">
-                    {index + 1} / {totalImages}
-                  </span>
-                </div>
-              )}
-
-              {/* Failed state with retry button */}
-              {isFailed && (
-                <div className="w-full flex items-center justify-center bg-dark-900/60 border border-dark-800 py-16 px-4 my-2 rounded-xl">
-                  <div className="text-center">
-                    <p className="text-text-muted text-sm mb-3">
-                      Error al cargar la imagen {index + 1}
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFailedImages((prev) => {
-                          const next = new Set(prev);
-                          next.delete(index);
-                          return next;
-                        });
-                        setLoadedImages((prev) => {
-                          const next = new Set(prev);
-                          next.delete(index);
-                          return next;
-                        });
-                        setUseFallback((prev) => {
-                          const next = new Set(prev);
-                          next.delete(index);
-                          return next;
-                        });
-                      }}
-                      className="px-4 py-2 rounded-lg bg-accent/20 border border-accent/40 text-accent text-xs font-bold hover:bg-accent hover:text-dark-950 transition-colors cursor-pointer"
-                    >
-                      Reintentar imagen
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Actual image */}
-              {!isFailed && (
-                <img
-                  src={imageUrl}
-                  alt={`Página ${index + 1}`}
-                  loading="eager"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                  ref={(img) => {
-                    // Check if already completed by browser cache
-                    if (img && img.complete && img.naturalWidth > 0 && !isLoaded) {
-                      handleImageLoad(index);
-                    }
-                  }}
-                  className={`w-full block transition-opacity duration-300 ease-out ${
-                    isLoaded
-                      ? 'opacity-100 relative'
-                      : 'opacity-0 absolute inset-0 pointer-events-none'
-                  }`}
-                  onLoad={() => handleImageLoad(index)}
-                  onError={() => handleImageError(index)}
-                />
-              )}
-            </div>
-          );
-        })}
+        {pages.map((url, index) => (
+          <ChapterPage
+            key={`${chapterId}-page-${index}`}
+            index={index}
+            totalImages={totalImages}
+            originalUrl={url}
+            dataSaverUrl={pagesDataSaver[index]}
+            isInitialEager={index < 2}
+            preferredQuality={activeQuality}
+            chapterId={chapterId}
+            onLoaded={handleImageLoad}
+          />
+        ))}
       </div>
 
       {/* Spacing between last image and navigation section */}

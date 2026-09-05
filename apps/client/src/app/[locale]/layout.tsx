@@ -3,6 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Navbar } from '@/components/layout/navbar';
+import { AuthProvider } from '@/lib/auth/auth-context';
 
 interface LocaleLayoutProps {
   children: React.ReactNode;
@@ -24,8 +25,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
 
   return (
     <NextIntlClientProvider locale={locale}>
-      <Navbar />
-      <main className="flex-1 pt-16">{children}</main>
+      <AuthProvider>
+        <Navbar />
+        <main className="flex-1 pt-16">{children}</main>
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }

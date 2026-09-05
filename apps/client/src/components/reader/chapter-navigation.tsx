@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { ChevronLeft, ChevronRight, BookOpen } from 'lucide-react';
 
@@ -16,13 +17,15 @@ export function ChapterNavigation({
   nextChapterId,
   currentChapterNumber,
 }: ChapterNavigationProps) {
+  const t = useTranslations('reader');
+
   return (
     <div className="border-t border-dark-800 bg-dark-900/80 backdrop-blur-md">
       <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Current Chapter Label */}
         {currentChapterNumber && (
           <p className="text-center text-text-muted text-xs font-medium mb-4 uppercase tracking-wider">
-            Fin del Episodio {currentChapterNumber}
+            {t('endOfChapter', { number: currentChapterNumber })}
           </p>
         )}
 
@@ -38,12 +41,12 @@ export function ChapterNavigation({
                 size={16}
                 className="group-hover:-translate-x-0.5 transition-transform"
               />
-              <span className="text-sm font-semibold">Anterior</span>
+              <span className="text-sm font-semibold">{t('previous')}</span>
             </Link>
           ) : (
             <div className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-800/40 border border-dark-800 text-text-muted cursor-not-allowed">
               <ChevronLeft size={16} />
-              <span className="text-sm font-semibold">Anterior</span>
+              <span className="text-sm font-semibold">{t('previous')}</span>
             </div>
           )}
 
@@ -51,7 +54,7 @@ export function ChapterNavigation({
           <Link
             href={`/series/detail/${seriesId}`}
             className="shrink-0 p-3 rounded-xl bg-accent/10 hover:bg-accent/20 border border-accent/20 hover:border-accent/40 text-accent transition-all duration-200 group"
-            aria-label="Volver a la serie"
+            aria-label={t('backToSeries')}
           >
             <BookOpen
               size={18}
@@ -65,7 +68,7 @@ export function ChapterNavigation({
               href={`/series/detail/${seriesId}/chapter/${nextChapterId}`}
               className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-accent hover:bg-accent-hover text-dark-950 font-bold transition-all duration-200 group shadow-lg shadow-accent/20"
             >
-              <span className="text-sm font-semibold">Siguiente</span>
+              <span className="text-sm font-semibold">{t('next')}</span>
               <ChevronRight
                 size={16}
                 className="group-hover:translate-x-0.5 transition-transform"
@@ -73,7 +76,7 @@ export function ChapterNavigation({
             </Link>
           ) : (
             <div className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-dark-800/40 border border-dark-800 text-text-muted cursor-not-allowed">
-              <span className="text-sm font-semibold">Siguiente</span>
+              <span className="text-sm font-semibold">{t('next')}</span>
               <ChevronRight size={16} />
             </div>
           )}

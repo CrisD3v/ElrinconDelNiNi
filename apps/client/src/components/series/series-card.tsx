@@ -1,4 +1,7 @@
+'use client';
+
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Badge } from '@/components/ui/badge';
 import type { SeriesDetail } from '@/lib/api/types';
@@ -8,7 +11,20 @@ interface SeriesCardProps {
 }
 
 export function SeriesCard({ series }: SeriesCardProps) {
+  const tStatus = useTranslations('series.status');
   const displayTags = series.tags.slice(0, 2);
+
+  const normalizedStatus = series.status?.toLowerCase() || '';
+  const statusLabel =
+    normalizedStatus === 'ongoing' || normalizedStatus === 'en emisión'
+      ? tStatus('ongoing')
+      : normalizedStatus === 'completed' || normalizedStatus === 'completado'
+        ? tStatus('completed')
+        : normalizedStatus === 'hiatus' || normalizedStatus === 'en pausa'
+          ? tStatus('hiatus')
+          : normalizedStatus === 'cancelled' || normalizedStatus === 'cancelado'
+            ? tStatus('cancelled')
+            : series.status;
 
   return (
     <Link
@@ -50,10 +66,10 @@ export function SeriesCard({ series }: SeriesCardProps) {
         " />
 
         {/* Status badge */}
-        {series.status && (
+        {statusLabel && (
           <div className="absolute top-2 right-2">
             <Badge variant="accent" className="text-[10px]">
-              {series.status}
+              {statusLabel}
             </Badge>
           </div>
         )}
@@ -65,12 +81,16 @@ export function SeriesCard({ series }: SeriesCardProps) {
           {series.title}
         </h3>
 
+        {/* Tags */}
         {displayTags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {displayTags.map((tag) => (
-              <Badge key={tag} variant="muted" className="text-[10px]">
+              <span
+                key={tag}
+                className="text-[11px] text-text-muted bg-dark-800/80 px-1.5 py-0.5 rounded"
+              >
                 {tag}
-              </Badge>
+              </span>
             ))}
           </div>
         )}

@@ -1,23 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { SlidersHorizontal, Maximize2, Minimize2 } from 'lucide-react';
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
 import { ReaderConfigPanel } from './reader-config-panel';
 
+import type { ImageQuality } from '@/hooks/use-reader-settings';
+
 interface ReaderToolbarProps {
   brightness: number;
   pageWidth: number;
+  quality: ImageQuality;
   onBrightnessChange: (value: number) => void;
   onPageWidthChange: (value: number) => void;
+  onQualityChange: (value: ImageQuality) => void;
 }
 
 export function ReaderToolbar({
   brightness,
   pageWidth,
+  quality,
   onBrightnessChange,
   onPageWidthChange,
+  onQualityChange,
 }: ReaderToolbarProps) {
+  const t = useTranslations('reader');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -55,13 +63,13 @@ export function ReaderToolbar({
             <button
               type="button"
               className="flex items-center gap-2 text-sm text-text-secondary hover:text-accent transition-colors group cursor-pointer"
-              aria-label="Abrir configuración de lectura"
+              aria-label={t('configTitle')}
             >
               <SlidersHorizontal
                 size={16}
                 className="text-text-muted group-hover:text-accent transition-colors"
               />
-              <span className="font-medium text-xs sm:text-sm">Configuración</span>
+              <span className="font-medium text-xs sm:text-sm">{t('config')}</span>
             </button>
           </DrawerTrigger>
 
@@ -69,8 +77,10 @@ export function ReaderToolbar({
             <ReaderConfigPanel
               brightness={brightness}
               pageWidth={pageWidth}
+              quality={quality}
               onBrightnessChange={onBrightnessChange}
               onPageWidthChange={onPageWidthChange}
+              onQualityChange={onQualityChange}
             />
           </DrawerContent>
         </Drawer>
@@ -80,7 +90,7 @@ export function ReaderToolbar({
           type="button"
           onClick={toggleFullscreen}
           className="p-1.5 rounded-lg text-text-secondary hover:text-accent hover:bg-dark-800/60 transition-all cursor-pointer"
-          aria-label={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
+          aria-label={isFullscreen ? t('exitFullscreen') : t('fullscreen')}
         >
           {isFullscreen ? <Minimize2 size={17} /> : <Maximize2 size={17} />}
         </button>

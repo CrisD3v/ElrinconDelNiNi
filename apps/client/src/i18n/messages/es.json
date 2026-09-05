@@ -33,6 +33,7 @@
   },
   "detail": {
     "episodes": "Episodios",
+    "comments": "Comentarios",
     "startReading": "EMPEZAR A LEER",
     "myList": "Lista",
     "share": "Compartir",
@@ -184,5 +185,48 @@
   "meta": {
     "title": "El Rincón del NiNi — Tu portal de manga",
     "description": "Descubre, lee y sigue las mejores series de manga. Últimos lanzamientos, top series y series del día."
+  },
+  "comments": {
+    "comments": "Comentarios",
+    "commentPlaceholder": "Escribe un comentario...",
+    "replyPlaceholder": "Responder a {name}...",
+    "publish": "Publicar",
+    "publishing": "Publicando",
+    "cancel": "Cancelar",
+    "reply": "Responder",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "report": "Reportar",
+    "like": "Me gusta",
+    "dislike": "No me gusta",
+    "spoiler": "Spoiler",
+    "markSpoiler": "Marcar como spoiler",
+    "attachImage": "Adjuntar imagen o GIF",
+    "pinned": "Fijado",
+    "edited": "editado",
+    "noComments": "Sin comentarios aún",
+    "beFirstComment": "Sé el primero en comentar",
+    "commentsCount": "{count, plural, =0 {Sin comentarios} one {# comentario} other {# comentarios}}",
+    "allCommentsLoaded": "Fin de los comentarios",
+    "loginToComment": "Inicia sesión para comentar",
+    "viewOneReply": "Ver 1 respuesta",
+    "viewReplies": "Ver {count} respuestas",
+    "collapseReplies": "Ocultar respuestas",
+    "hiddenComment": "Comentario oculto por reportes",
+    "clickReveal": "click para ver",
+    "reportComment": "Reportar comentario",
+    "reportReason": "¿Por qué reportas este comentario?",
+    "sendReport": "Enviar reporte",
+    "reportSent": "¡Reporte enviado!",
+    "reportThanks": "Gracias por ayudarnos a mantener la comunidad.",
+    "reportOtherPlaceholder": "Describe el motivo...",
+    "reportReasons": {
+      "spam": "Spam o contenido repetitivo",
+      "harassment": "Acoso o ataques personales",
+      "spoiler_unmarked": "Spoiler sin marcar",
+      "hate_speech": "Discurso de odio",
+      "misinformation": "Información falsa",
+      "other": "Otro"
+    }
   }
 }

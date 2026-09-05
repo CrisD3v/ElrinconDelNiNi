@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useReaderSettings, type ImageQuality } from '@/hooks/use-reader-settings';
 import { ReaderToolbar } from './reader-toolbar';
 import { ChapterNavigation } from './chapter-navigation';
+import { CommentSection } from '@/features/comments';
 
 interface ChapterPageProps {
   index: number;
@@ -181,6 +182,7 @@ export function ManhwaReader({
 
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const [isFinishedLoading, setIsFinishedLoading] = useState(false);
+  const [showComments, setShowComments] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const totalImages = pages.length;
@@ -279,6 +281,63 @@ export function ManhwaReader({
         nextChapterId={nextChapterId}
         currentChapterNumber={currentChapterNumber}
       />
+
+      {/* Comments Toggle Button */}
+      <button
+        id="reader-comments-btn"
+        onClick={() => setShowComments(true)}
+        className="fixed bottom-24 right-4 z-40 flex items-center gap-2 px-4 py-2.5 rounded-full bg-dark-900/90 border border-dark-600/60 text-text-secondary hover:text-text-primary hover:border-gold-500/40 shadow-xl backdrop-blur-sm transition-all hover:scale-105 active:scale-95"
+        title="Ver comentarios"
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span className="text-xs font-medium">Comentarios</span>
+      </button>
+
+      {/* Comments Slide-up Panel */}
+      <div
+        className={`fixed inset-x-0 bottom-0 z-50 flex flex-col transition-transform duration-400 ease-in-out ${
+          showComments ? 'translate-y-0' : 'translate-y-full'
+        }`}
+        style={{ maxHeight: '80vh' }}
+      >
+        {/* Overlay */}
+        {showComments && (
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm -z-10"
+            onClick={() => setShowComments(false)}
+          />
+        )}
+
+        <div className="flex flex-col bg-dark-900/98 border-t border-dark-600/60 rounded-t-2xl shadow-2xl" style={{ maxHeight: '80vh' }}>
+          {/* Panel handle / header */}
+          <div className="flex items-center justify-between px-4 py-3 border-b border-dark-700/50 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-1 rounded-full bg-dark-600 mx-auto absolute left-1/2 -translate-x-1/2 top-3" />
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-gold-400" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              </svg>
+              <span className="font-semibold text-sm text-text-primary">Comentarios del capítulo</span>
+            </div>
+            <button
+              onClick={() => setShowComments(false)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-text-muted hover:text-text-primary hover:bg-dark-700/50 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
+
+          {/* Comments content */}
+          <div className="flex-1 overflow-hidden">
+            {showComments && (
+              <CommentSection chapterId={chapterId} compact />
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

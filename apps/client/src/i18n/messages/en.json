@@ -33,6 +33,7 @@
   },
   "detail": {
     "episodes": "Episodes",
+    "comments": "Comments",
     "startReading": "START READING",
     "myList": "My List",
     "share": "Share",
@@ -184,5 +185,48 @@
   "meta": {
     "title": "El Rincón del NiNi — Your manga portal",
     "description": "Discover, read, and follow the best manga series. Latest releases, top series, and daily picks."
+  },
+  "comments": {
+    "comments": "Comments",
+    "commentPlaceholder": "Write a comment...",
+    "replyPlaceholder": "Reply to {name}...",
+    "publish": "Post",
+    "publishing": "Posting",
+    "cancel": "Cancel",
+    "reply": "Reply",
+    "edit": "Edit",
+    "delete": "Delete",
+    "report": "Report",
+    "like": "Like",
+    "dislike": "Dislike",
+    "spoiler": "Spoiler",
+    "markSpoiler": "Mark as spoiler",
+    "attachImage": "Attach image or GIF",
+    "pinned": "Pinned",
+    "edited": "edited",
+    "noComments": "No comments yet",
+    "beFirstComment": "Be the first to comment",
+    "commentsCount": "{count, plural, =0 {No comments} one {# comment} other {# comments}}",
+    "allCommentsLoaded": "End of comments",
+    "loginToComment": "Sign in to comment",
+    "viewOneReply": "View 1 reply",
+    "viewReplies": "View {count} replies",
+    "collapseReplies": "Hide replies",
+    "hiddenComment": "Comment hidden due to reports",
+    "clickReveal": "click to show",
+    "reportComment": "Report comment",
+    "reportReason": "Why are you reporting this comment?",
+    "sendReport": "Send report",
+    "reportSent": "Report sent!",
+    "reportThanks": "Thanks for helping us keep the community safe.",
+    "reportOtherPlaceholder": "Describe the reason...",
+    "reportReasons": {
+      "spam": "Spam or repetitive content",
+      "harassment": "Harassment or personal attacks",
+      "spoiler_unmarked": "Unmarked spoiler",
+      "hate_speech": "Hate speech",
+      "misinformation": "False information",
+      "other": "Other"
+    }
   }
 }

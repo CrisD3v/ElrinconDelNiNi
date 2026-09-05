@@ -2,8 +2,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 import { getSeriesDetail, getSeriesChapters } from '@/lib/api/series';
 import { SeriesSidebar } from '@/components/series/detail/series-sidebar';
-import { ChapterList } from '@/components/series/detail/chapter-list';
-import { SeasonSelector } from '@/components/series/detail/season-selector';
+import { SeriesContentTabs } from '@/components/series/detail/series-content-tabs';
 
 import { Chapter, SeriesDetail } from '@/lib/api/types';
 
@@ -48,19 +47,11 @@ export default async function SeriesDetailPage({ params }: SeriesDetailPageProps
             <SeriesSidebar series={series} />
           </div>
 
-          {/* Main Content (Chapters) */}
-          <div className="flex-1 w-full min-w-0">
-            <h2 className="text-2xl font-bold text-text-primary mb-6">{t('episodes')}</h2>
-            
-            <SeasonSelector 
-              seasons={[]}
-              activeSeasonId={''}
-            />
-            
-            <div className="mt-8">
-              <ChapterList chapters={chapters} seriesId={series.id} />
-            </div>
-          </div>
+          {/* Main Content — tabs: Episodios / Comentarios */}
+          <SeriesContentTabs
+            chapters={chapters}
+            seriesId={series.id}
+          />
         </div>
       </div>
     </div>

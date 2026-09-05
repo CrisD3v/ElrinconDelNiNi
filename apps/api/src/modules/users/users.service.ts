@@ -19,15 +19,6 @@ export class UsersService {
     }).first();
 
     if (existing) {
-      if (
-        authUser.displayName &&
-        existing.displayName !== authUser.displayName
-      ) {
-        const updated = await this.prisma.db.orm.public.User.where({
-          id: existing.id,
-        }).update({ displayName: authUser.displayName });
-        if (updated) return updated;
-      }
       return existing;
     }
 

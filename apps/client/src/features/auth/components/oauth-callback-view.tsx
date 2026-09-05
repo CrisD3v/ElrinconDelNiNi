@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import {
   MangaPageLoader,
   TornPanelError,
@@ -26,18 +25,16 @@ export function OAuthCallbackView({
   onRetry,
   className = '',
 }: OAuthCallbackViewProps) {
-  const t = useTranslations('auth.oauthView');
-
   return (
     <div className={`min-h-[75vh] flex items-center justify-center px-4 py-12 ${className}`}>
       <FeedbackCardRoot>
         {status === 'loading' && (
           <div className="space-y-6">
-            <FeedbackCardVolume>{t('loadingBadge')}</FeedbackCardVolume>
+            <FeedbackCardVolume>Autenticando</FeedbackCardVolume>
             <MangaPageLoader
               size="lg"
-              label={t('loadingTitle')}
-              sublabel={t('loadingSubtitle')}
+              label="Verificando credenciales..."
+              sublabel="Por favor espera un momento"
               showFilament={true}
               showIconBadge={true}
             />
@@ -47,7 +44,7 @@ export function OAuthCallbackView({
         {status === 'error' && (
           <div className="space-y-6 animate-in fade-in-50 duration-300">
             <FeedbackCardVolume className="text-red-400 border-[#5c2828] bg-[#241717]">
-              {t('errorBadge')}
+              Error de sesión
             </FeedbackCardVolume>
 
             <div className="flex justify-center">
@@ -56,23 +53,23 @@ export function OAuthCallbackView({
 
             <div className="space-y-2">
               <FeedbackCardTitle className="text-red-300">
-                {t('errorTitle')}
+                Algo salió mal
               </FeedbackCardTitle>
               <FeedbackCardDescription>
-                {errorMessage || t('errorDefaultDescription')}
+                {errorMessage || 'Ocurrió un error inesperado.'}
               </FeedbackCardDescription>
             </div>
 
             {onRetry && (
               <FeedbackCardActions>
                 <Button onClick={onRetry} variant="secondary" className="w-full">
-                  {t('retryButton')}
+                  Volver al inicio
                 </Button>
               </FeedbackCardActions>
             )}
 
             <p className="text-xs text-text-muted">
-              {t('redirecting')}
+              Redirigiendo...
             </p>
           </div>
         )}
@@ -80,7 +77,7 @@ export function OAuthCallbackView({
         {status === 'success' && (
           <div className="space-y-6 animate-in fade-in-50 duration-300">
             <FeedbackCardVolume className="text-emerald-400 border-[#2b4c34] bg-[#1b221d]">
-              {t('successBadge')}
+              Autenticado
             </FeedbackCardVolume>
 
             <div className="flex justify-center">
@@ -89,16 +86,16 @@ export function OAuthCallbackView({
 
             <div className="space-y-2">
               <FeedbackCardTitle>
-                {t('successTitle')}
+                ¡Éxito!
               </FeedbackCardTitle>
               <FeedbackCardDescription>
-                {t('successSubtitle')}
+                Tu sesión ha sido iniciada.
               </FeedbackCardDescription>
             </div>
 
             <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full bg-[#181a19] border border-emerald-500/30 text-xs text-emerald-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>{t('enteringApp')}</span>
+              <span>Ingresando...</span>
             </div>
           </div>
         )}

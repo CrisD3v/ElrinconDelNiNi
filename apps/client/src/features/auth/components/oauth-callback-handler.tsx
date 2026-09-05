@@ -2,14 +2,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { toast } from '@/lib/toast';
 import { supabase } from '@/lib/supabase/client';
 
 import { OAuthCallbackView } from './oauth-callback-view';
 
 export function OAuthCallbackHandler() {
-  const t = useTranslations('auth.oauthHandler');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'error' | 'success'>('loading');
@@ -30,7 +28,7 @@ export function OAuthCallbackHandler() {
             setErrorMessage(msg);
           }
           toast.error({
-            title: t('errorTitle'),
+            title: 'Error de Autenticación',
             description: msg,
           });
           setTimeout(() => router.replace('/'), 3000);
@@ -54,7 +52,7 @@ export function OAuthCallbackHandler() {
             await new Promise((resolve) => setTimeout(resolve, 800));
             const { data: { session: retrySession } } = await supabase.auth.getSession();
             if (!retrySession) {
-              throw new Error(t('noCredentials'));
+              throw new Error('No se encontraron credenciales de sesión');
             }
           }
         }
@@ -64,20 +62,20 @@ export function OAuthCallbackHandler() {
         }
 
         toast.success({
-          title: t('successTitle'),
-          description: t('successDescription'),
+          title: '¡Bienvenido!',
+          description: 'Sesión iniciada correctamente.',
         });
 
         const next = searchParams.get('next') || '/';
         setTimeout(() => router.replace(next), 600);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : t('generalError');
+        const message = err instanceof Error ? err.message : 'Error al procesar el inicio de sesión.';
         if (!isCancelled) {
           setStatus('error');
           setErrorMessage(message);
         }
         toast.error({
-          title: t('errorTitle'),
+          title: 'Error de Autenticación',
           description: message,
         });
         setTimeout(() => router.replace('/'), 3500);
@@ -89,7 +87,7 @@ export function OAuthCallbackHandler() {
     return () => {
       isCancelled = true;
     };
-  }, [router, searchParams, t]);
+  }, [router, searchParams]);
 
   return (
     <OAuthCallbackView
@@ -99,4 +97,5 @@ export function OAuthCallbackHandler() {
     />
   );
 }
+
 

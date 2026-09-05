@@ -37,5 +37,6 @@
     "types": [
       "node"
     ]
-  }
+  },
+  "exclude": ["migrations", "node_modules", "dist"]
 }

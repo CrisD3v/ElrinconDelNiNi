@@ -91,3 +91,56 @@ export interface ChapterPages {
   pages: string[];
   pagesDataSaver: string[];
 }
+
+// Comments
+export interface CommentUser {
+  id: string;
+  displayName: string;
+  profileImage?: string | null;
+  badges: string[];
+}
+
+export interface CommentReactionGroup {
+  emoji: string;
+  count: number;
+  reactedByMe: boolean;
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  imageUrl?: string | null;
+  isSpoiler: boolean;
+  isHidden: boolean;
+  isPinned: boolean;
+  parentId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user: CommentUser;
+  likesCount: number;
+  dislikesCount: number;
+  myVote: 1 | -1 | 0;
+  reactions: CommentReactionGroup[];
+  reportsCount: number;
+  replies: Comment[];
+}
+
+export interface CommentsPage {
+  comments: Comment[];
+  nextCursor: string | null;
+  total: number;
+}
+
+export interface CreateCommentPayload {
+  content: string;
+  mangaId?: string;
+  chapterId?: string;
+  parentId?: string;
+  isSpoiler?: boolean;
+  image?: File | null;
+}
+
+export interface UpdateCommentPayload {
+  content?: string;
+  isSpoiler?: boolean;
+}

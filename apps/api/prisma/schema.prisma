@@ -17,9 +17,12 @@ model User {
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @default(now())
 
-  followers     Follow[]       @relation("following")
-  following     Follow[]       @relation("follower")
-  comments      Comment[]
+  followers        Follow[]          @relation("following")
+  following        Follow[]          @relation("follower")
+  comments         Comment[]
+  commentLikes     CommentLike[]
+  commentReactions CommentReaction[]
+  commentReports   CommentReport[]
 
   @@index([supabaseId])
   @@map("users")
@@ -43,15 +46,65 @@ model Comment {
   userId    String
   mangaId   String?
   chapterId String?
+  parentId  String?
   content   String
   imageUrl  String?
+  isSpoiler Boolean  @default(false)
+  isHidden  Boolean  @default(false)
+  isPinned  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Comment?          @relation("Replies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[]         @relation("Replies")
+  likes     CommentLike[]
+  reactions CommentReaction[]
+  reports   CommentReport[]
 
   @@index([mangaId])
   @@index([chapterId])
   @@index([userId])
+  @@index([parentId])
   @@map("comments")
+}
+
+model CommentLike {
+  id        String  @id @default(uuid())
+  commentId String
+  userId    String
+  value     Int     // +1 = like, -1 = dislike
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@map("comment_likes")
+}
+
+model CommentReaction {
+  id        String @id @default(uuid())
+  commentId String
+  userId    String
+  emoji     String // e.g. "🔥", "❤️", "😂"
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, emoji])
+  @@map("comment_reactions")
+}
+
+model CommentReport {
+  id        String   @id @default(uuid())
+  commentId String
+  userId    String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@map("comment_reports")
 }

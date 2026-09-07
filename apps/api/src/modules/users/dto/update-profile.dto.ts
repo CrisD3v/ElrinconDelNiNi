@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength, Matches } from 'class-validator';
 
 export class UpdateProfileDto {
   @ApiPropertyOptional({
@@ -10,6 +10,16 @@ export class UpdateProfileDto {
   @IsString()
   @MaxLength(50)
   displayName?: string;
+
+  @ApiPropertyOptional({
+    description: 'A unique username without spaces',
+    example: 'crisd3v',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  @Matches(/^[a-zA-Z0-9_]+$/, { message: 'Username must contain only letters, numbers, and underscores' })
+  username?: string;
 
   @ApiPropertyOptional({
     description: 'A short description or bio for the user profile',

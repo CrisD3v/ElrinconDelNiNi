@@ -54,8 +54,8 @@ export function useCommentForm({ onSubmit, onCancel, initialContent = '' }: UseC
   }, []);
 
   const insertMention = useCallback(
-    (user: CommentUser) => {
-      const newContent = content.replace(/@\w*$/, `@${user.displayName} `);
+    (user: any) => {
+      const newContent = content.replace(/@\w*$/, `@${user.username} `);
       setContent(newContent);
       setShowMentions(false);
       setMentionResults([]);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import type { Comment } from '@elrincondelnini/types';
 import { useComments } from '../hooks/use-comments';
@@ -27,9 +27,34 @@ export function CommentList({ commentsData }: CommentListProps) {
     voteComment,
     reactToComment,
     reportCommentAction,
+    newUnreadComments,
+    resetUnreadComments,
+    refresh,
   } = commentsData;
 
   const [replyingToId, setReplyingToId] = useState<string | null>(null);
+
+  // Auto-scroll to comment hash when data finishes loading
+  useEffect(() => {
+    if (!loading && comments.length > 0 && typeof window !== 'undefined') {
+      const hash = window.location.hash;
+      if (hash && hash.startsWith('#comment-')) {
+        const id = hash.replace('#', '');
+        const el = document.getElementById(id);
+        if (el) {
+          // Add a slight delay to ensure rendering is complete
+          setTimeout(() => {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Optional: highlight the comment briefly
+            el.classList.add('ring-2', 'ring-gold-500', 'ring-offset-2', 'ring-offset-dark-900', 'transition-all', 'duration-1000');
+            setTimeout(() => {
+              el.classList.remove('ring-2', 'ring-gold-500', 'ring-offset-2', 'ring-offset-dark-900');
+            }, 3000);
+          }, 100);
+        }
+      }
+    }
+  }, [loading, comments.length]);
 
   const handleReply = (comment: Comment) => {
     setReplyingToId((prev) => (prev === comment.id ? null : comment.id));
@@ -85,7 +110,7 @@ export function CommentList({ commentsData }: CommentListProps) {
 
       <div className="space-y-5">
         {comments.map((comment) => (
-          <div key={comment.id} className="space-y-2">
+          <div key={comment.id} id={`comment-${comment.id}`} className="space-y-2">
             {/* Pinned comments appear at the top with a gold accent */}
             <div
               className={
@@ -139,6 +164,24 @@ export function CommentList({ commentsData }: CommentListProps) {
         <p className="text-center text-xs text-text-muted py-4">
           — {t('allCommentsLoaded')} —
         </p>
+      )}
+
+      {/* Floating button for new unread comments */}
+      {newUnreadComments > 0 && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+          <button
+            onClick={() => {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+              resetUnreadComments();
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-accent/90 backdrop-blur-sm shadow-xl text-white font-semibold text-sm hover:bg-accent transition-all animate-bounce"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 19V5M5 12l7-7 7 7"/>
+            </svg>
+            {newUnreadComments} {newUnreadComments === 1 ? 'nuevo comentario' : 'nuevos comentarios'}
+          </button>
+        </div>
       )}
     </div>
   );

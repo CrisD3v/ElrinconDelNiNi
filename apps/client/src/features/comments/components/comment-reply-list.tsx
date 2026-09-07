@@ -36,7 +36,7 @@ export function CommentReplyList({
   const hasReplies = comment.replies.length > 0;
   const isReplyingHere = replyingToId === comment.id || comment.replies.some(r => r.id === replyingToId);
   const replyingToComment = isReplyingHere && replyingToId !== comment.id ? comment.replies.find(r => r.id === replyingToId) : null;
-  const initialContent = replyingToComment ? `@${replyingToComment.user?.displayName} ` : '';
+  const initialContent = replyingToComment ? `@${replyingToComment.user?.username} ` : '';
 
   return (
     <div className="ml-11">

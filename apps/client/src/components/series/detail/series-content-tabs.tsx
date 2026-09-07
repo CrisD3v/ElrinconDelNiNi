@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams } from 'next/navigation';
 import { ChapterList } from './chapter-list';
 import { SeasonSelector } from './season-selector';
 import { CommentSection } from '@/features/comments';
@@ -15,7 +16,15 @@ interface SeriesContentTabsProps {
 
 export function SeriesContentTabs({ chapters, seriesId, seasons = [] }: SeriesContentTabsProps) {
   const t = useTranslations('detail');
-  const [activeTab, setActiveTab] = useState<'episodes' | 'comments'>('episodes');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState<'episodes' | 'comments'>(tabParam === 'comments' ? 'comments' : 'episodes');
+
+  // Listen for URL changes if user clicks a notification while already on the page
+  useEffect(() => {
+    if (tabParam === 'comments') setActiveTab('comments');
+    else if (tabParam === 'episodes') setActiveTab('episodes');
+  }, [tabParam]);
 
   return (
     <div className="flex-1 w-full min-w-0">

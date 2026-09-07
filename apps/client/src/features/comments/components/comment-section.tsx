@@ -54,12 +54,21 @@ export function CommentSection({ mangaId, chapterId, compact = false }: CommentS
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <CommentForm
-              onSubmit={async (payload) => {
-                await addComment(payload);
-              }}
-              compact={compact}
-            />
+            {!profile?.username ? (
+              <div className="h-[80px] rounded-2xl border border-dark-600/60 bg-dark-800/60 flex flex-col items-center justify-center text-center p-4">
+                <p className="text-sm text-text-secondary mb-1">Casi listo, solo falta un detalle.</p>
+                <p className="text-xs text-text-muted">
+                  Ve a <span className="text-gold-400 font-semibold cursor-pointer" onClick={() => document.getElementById('profile-menu-trigger')?.click()}>Perfil &gt; Ajustes</span> y configura un @usuario único para poder comentar.
+                </p>
+              </div>
+            ) : (
+              <CommentForm
+                onSubmit={async (payload) => {
+                  await addComment(payload);
+                }}
+                compact={compact}
+              />
+            )}
           </div>
         </div>
       ) : (

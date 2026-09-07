@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { useCommentForm } from '../hooks/use-comment-form';
 import type { CommentUser } from '@elrincondelnini/types';
+import { MentionDropdown } from './mention-dropdown';
 
 interface CommentFormProps {
   onSubmit: (payload: { content: string; isSpoiler: boolean; image: File | null }) => Promise<void>;
@@ -28,6 +29,7 @@ export function CommentForm({
     imagePreview,
     submitting,
     error,
+    mentionQuery,
     mentionResults,
     showMentions,
     textareaRef,
@@ -68,36 +70,13 @@ export function CommentForm({
           />
 
           {/* @mention autocomplete */}
-          {showMentions && mentionResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl border border-dark-600/60 bg-dark-900/95 backdrop-blur-sm shadow-2xl overflow-hidden">
-              {mentionResults.map((user: CommentUser) => (
-                <button
-                  key={user.id}
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    insertMention(user);
-                  }}
-                  className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-dark-700/60 transition-colors"
-                >
-                  {user.profileImage ? (
-                    <img
-                      src={user.profileImage}
-                      alt={user.displayName}
-                      className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-                    />
-                  ) : (
-                    <div className="w-7 h-7 rounded-full bg-dark-700 flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs text-text-secondary font-bold">
-                        {user.displayName?.[0]?.toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                  <span className="text-sm text-text-primary">{user.displayName}</span>
-                </button>
-              ))}
-            </div>
-          )}
+          <MentionDropdown
+            textareaRef={textareaRef}
+            query={mentionQuery}
+            users={mentionResults}
+            visible={showMentions}
+            onSelect={insertMention}
+          />
         </div>
 
         {/* Image preview */}

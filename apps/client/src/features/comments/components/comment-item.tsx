@@ -10,6 +10,8 @@ import { CommentReactionPicker } from './comment-reaction-picker';
 import { CommentReportDialog } from './comment-report-dialog';
 import { UserHoverCard } from '../../users/components/user-hover-card';
 import { CommentForm } from './comment-form';
+import { useEffect, useRef } from 'react';
+import { animate } from 'animejs';
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -53,9 +55,25 @@ export function CommentItem({
   const [isEditing, setIsEditing] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const isOwn = profile?.id === comment.user?.id;
   const isHidden = comment.isHidden && !revealed;
+
+  // Animation for newly added comments
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const diff = Date.now() - new Date(comment.createdAt).getTime();
+    if (diff < 5000) {
+      animate(containerRef.current, {
+        backgroundColor: ['rgba(212, 175, 55, 0.15)', 'rgba(0, 0, 0, 0)'],
+        opacity: [0, 1],
+        translateX: [-10, 0],
+        duration: 1000,
+        easing: 'easeOutExpo',
+      });
+    }
+  }, [comment.createdAt]);
 
   if (isHidden) {
     return (
@@ -77,7 +95,7 @@ export function CommentItem({
   }
 
   return (
-    <div className={`group flex gap-3 ${isReply ? 'pl-4' : ''}`}>
+    <div ref={containerRef} className={`group flex gap-3 rounded-xl transition-colors ${isReply ? 'pl-4' : ''}`}>
       {/* Avatar */}
       <UserHoverCard user={comment.user!}>
         <div className="w-9 h-9 rounded-full border-2 border-dark-700 bg-dark-700 flex-shrink-0 overflow-hidden mt-1 group-hover/avatar:border-gold-500/50 transition-colors cursor-pointer">
@@ -89,7 +107,7 @@ export function CommentItem({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-dark-600 text-gold-400 font-bold">
-              {(comment.user?.displayName || 'U')[0].toUpperCase()}
+              {(comment.user?.username || 'U')[0].toUpperCase()}
             </div>
           )}
         </div>
@@ -101,7 +119,7 @@ export function CommentItem({
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <UserHoverCard user={comment.user!}>
             <span className="text-sm font-semibold text-text-primary cursor-pointer hover:underline decoration-gold-500/50 underline-offset-4">
-              {comment.user?.displayName ?? 'Usuario'}
+              @{comment.user?.username ?? 'usuario'}
             </span>
           </UserHoverCard>
           {comment.isPinned && (

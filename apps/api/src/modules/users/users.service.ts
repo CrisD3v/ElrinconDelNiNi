@@ -46,7 +46,6 @@ export class UsersService {
     return this.prisma.db.orm.public.User.create({
       supabaseId: authUser.supabaseId,
       email: authUser.email,
-      displayName: authUser.displayName,
       badges: ['READER'],
     });
   }
@@ -60,6 +59,7 @@ export class UsersService {
     data: {
       description?: string;
       displayName?: string;
+      username?: string;
       profileImage?: string | null;
       bannerImage?: string | null;
     },
@@ -69,12 +69,25 @@ export class UsersService {
       updateData.description = data.description;
     if (data.displayName !== undefined)
       updateData.displayName = data.displayName;
+    
+    if (data.username !== undefined) {
+      if (data.username) {
+        // Check uniqueness
+        const existing = await this.prisma.db.orm.public.User.where({ username: data.username }).first();
+        if (existing && existing.id !== id) {
+          throw new BadRequestException('Este nombre de usuario ya está en uso');
+        }
+      }
+      updateData.username = data.username;
+    }
+
     if (data.profileImage !== undefined)
       updateData.profileImage = data.profileImage;
     if (data.bannerImage !== undefined)
       updateData.bannerImage = data.bannerImage;
 
-    return this.prisma.db.orm.public.User.where({ id }).update(updateData);
+    await this.prisma.db.orm.public.User.where({ id }).update(updateData);
+    return this.prisma.db.orm.public.User.where({ id }).first();
   }
 
   async follow(followerId: string, followingId: string): Promise<any> {
@@ -112,9 +125,11 @@ export class UsersService {
   }
 
   async getFollowers(userId: string): Promise<any[]> {
-    const follows: any[] = await toArray(await this.prisma.db.orm.public.Follow.where({
-      followingId: userId,
-    }));
+    const follows: any[] = await toArray(
+      await this.prisma.db.orm.public.Follow.where({
+        followingId: userId,
+      }),
+    );
     // Prisma Next does not seem to include relations in .many() by default the same way
     // Assuming simple mapping or fetching users manually
     const followerIds = follows.map((f) => f.followerId);
@@ -139,9 +154,11 @@ export class UsersService {
   }
 
   async getFollowing(userId: string): Promise<any[]> {
-    const follows: any[] = await toArray(await this.prisma.db.orm.public.Follow.where({
-      followerId: userId,
-    }));
+    const follows: any[] = await toArray(
+      await this.prisma.db.orm.public.Follow.where({
+        followerId: userId,
+      }),
+    );
     const followingIds = follows.map((f) => f.followingId);
     if (!followingIds.length) return [];
 
@@ -159,5 +176,41 @@ export class UsersService {
         description: u?.description,
         badges: u?.badges,
       }));
+  }
+
+  async getFavorites(userId: string): Promise<any[]> {
+    return toArray(
+      await this.prisma.db.orm.public.Favorite.where({
+        userId,
+      }),
+    );
+  }
+
+  async toggleFavorite(userId: string, mangaId: string) {
+    const existing = await this.prisma.db.orm.public.Favorite.where({
+      userId,
+      mangaId,
+    }).first();
+
+    if (existing) {
+      await this.prisma.db.orm.public.Favorite.where({
+        id: existing.id,
+      }).delete();
+      return { isFavorite: false };
+    }
+
+    await this.prisma.db.orm.public.Favorite.create({
+      userId,
+      mangaId,
+    });
+    return { isFavorite: true };
+  }
+
+  async checkFavorite(userId: string, mangaId: string) {
+    const existing = await this.prisma.db.orm.public.Favorite.where({
+      userId,
+      mangaId,
+    }).first();
+    return { isFavorite: !!existing };
   }
 }

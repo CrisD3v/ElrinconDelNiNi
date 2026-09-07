@@ -50,6 +50,7 @@ export class UsersController {
     return {
       id: user.id,
       email: user.email,
+      username: user.username,
       displayName: user.displayName,
       profileImage: user.profileImage,
       bannerImage: user.bannerImage,
@@ -88,7 +89,10 @@ export class UsersController {
     const MAX_BANNER_SIZE =
       parseInt(process.env.MAX_BANNER_IMAGE_SIZE_MB || '5') * 1024 * 1024;
 
-    if (body.removeProfileImage === 'true' || body.removeProfileImage === true) {
+    if (
+      body.removeProfileImage === 'true' ||
+      body.removeProfileImage === true
+    ) {
       profileImageUrl = null;
     }
 
@@ -127,18 +131,20 @@ export class UsersController {
     const updatedUser = await this.usersService.updateProfile(user.id, {
       description: body.description,
       displayName: body.displayName,
+      username: body.username,
       profileImage: profileImageUrl,
       bannerImage: bannerImageUrl,
     });
 
     const createdAtStr =
-      typeof (updatedUser.createdAt as any)?.toString === 'function'
-        ? (updatedUser.createdAt as any).toString()
+      typeof updatedUser.createdAt?.toString === 'function'
+        ? updatedUser.createdAt.toString()
         : String(updatedUser.createdAt);
 
     return {
       id: updatedUser.id,
       email: updatedUser.email,
+      username: updatedUser.username,
       displayName: updatedUser.displayName,
       profileImage: updatedUser.profileImage,
       bannerImage: updatedUser.bannerImage,
@@ -189,5 +195,41 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'List of following users' })
   async getFollowing(@Param('id') id: string) {
     return this.usersService.getFollowing(id);
+  }
+
+  @Get('me/favorites')
+  @UseGuards(SupabaseAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user favorites' })
+  @ApiResponse({ status: 200, description: 'List of favorite manga IDs' })
+  async getFavorites(@CurrentUser() authUser: AuthenticatedUser) {
+    const user = await this.usersService.findOrCreate(authUser);
+    return this.usersService.getFavorites(user.id);
+  }
+
+  @Post('me/favorites/:mangaId')
+  @UseGuards(SupabaseAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Toggle favorite status for a manga' })
+  @ApiResponse({ status: 200, description: 'Favorite toggled successfully' })
+  async toggleFavorite(
+    @CurrentUser() authUser: AuthenticatedUser,
+    @Param('mangaId') mangaId: string,
+  ) {
+    const user = await this.usersService.findOrCreate(authUser);
+    return this.usersService.toggleFavorite(user.id, mangaId);
+  }
+
+  @Get('me/favorites/:mangaId/check')
+  @UseGuards(SupabaseAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if a manga is in favorites' })
+  @ApiResponse({ status: 200, description: 'Boolean indicating favorite status' })
+  async checkFavorite(
+    @CurrentUser() authUser: AuthenticatedUser,
+    @Param('mangaId') mangaId: string,
+  ) {
+    const user = await this.usersService.findOrCreate(authUser);
+    return this.usersService.checkFavorite(user.id, mangaId);
   }
 }

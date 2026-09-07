@@ -79,7 +79,9 @@ export class CommentsController {
   // ─── List ────────────────────────────────────────────────────────────────────
 
   @Get('series/:mangaId')
-  @ApiOperation({ summary: 'Get comments for a manga series (cursor paginated)' })
+  @ApiOperation({
+    summary: 'Get comments for a manga series (cursor paginated)',
+  })
   @ApiQuery({ name: 'cursor', required: false })
   @ApiResponse({ status: 200, description: 'Paginated comments with replies' })
   async getCommentsByManga(
@@ -138,7 +140,9 @@ export class CommentsController {
   @Post(':id/like')
   @UseGuards(SupabaseAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Like (+1) or dislike (-1) a comment. Toggling removes the vote.' })
+  @ApiOperation({
+    summary: 'Like (+1) or dislike (-1) a comment. Toggling removes the vote.',
+  })
   @ApiResponse({ status: 201, description: 'Vote registered' })
   async likeComment(
     @CurrentUser() authUser: AuthenticatedUser,
@@ -202,5 +206,14 @@ export class CommentsController {
   async searchUsers(@Query('q') q: string) {
     return this.commentsService.searchUsers(q);
   }
-}
 
+  // ─── Get ─────────────────────────────────────────────────────────────────────
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a single comment by ID' })
+  @ApiResponse({ status: 200, description: 'The comment' })
+  async getComment(@Param('id') id: string, @Request() req?: any) {
+    const userId = req?.user?.id ?? undefined;
+    return this.commentsService.getComment(id, userId);
+  }
+}

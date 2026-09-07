@@ -1,5 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export class CreateCommentDto {
@@ -13,7 +19,8 @@ export class CreateCommentDto {
   content: string;
 
   @ApiPropertyOptional({
-    description: 'The ID of the manga this comment is attached to (if commenting on a series)',
+    description:
+      'The ID of the manga this comment is attached to (if commenting on a series)',
     example: 'f9c33607-9180-4ba6-b85c-e4b5faee7192',
   })
   @IsOptional()
@@ -21,7 +28,8 @@ export class CreateCommentDto {
   mangaId?: string;
 
   @ApiPropertyOptional({
-    description: 'The ID of the chapter this comment is attached to (if commenting on a specific chapter)',
+    description:
+      'The ID of the chapter this comment is attached to (if commenting on a specific chapter)',
     example: 'c1234567-89ab-cdef-0123-456789abcdef',
   })
   @IsOptional()

@@ -6,6 +6,8 @@ import {
 } from '@nestjs/common';
 import type { AuthenticatedUser } from '#common/types/index.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { CommentsGateway } from './comments.gateway.js';
 
 const REPORT_AUTO_HIDE_THRESHOLD = 5;
 const DEFAULT_PAGE_SIZE = 20;
@@ -33,39 +35,61 @@ async function toArray<T>(iterable: any): Promise<T[]> {
 
 @Injectable()
 export class CommentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+    private readonly gateway: CommentsGateway,
+  ) {}
 
   // ─── Helpers ────────────────────────────────────────────────────────────────
 
   private async findUser(supabaseId: string) {
-    const user = await this.prisma.db.orm.public.User.where({ supabaseId }).first();
+    const user = await this.prisma.db.orm.public.User.where({
+      supabaseId,
+    }).first();
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
 
   private async findComment(id: string) {
-    const comment = await this.prisma.db.orm.public.Comment.where({ id }).first();
+    const comment = await this.prisma.db.orm.public.Comment.where({
+      id,
+    }).first();
     if (!comment) throw new NotFoundException('Comment not found');
     return comment;
   }
 
   /** Shape a raw comment row with enriched data for the response */
   private async enrichComment(c: any, currentUserId?: string): Promise<any> {
-    const user = await this.prisma.db.orm.public.User.where({ id: c.userId }).first();
+    const user = await this.prisma.db.orm.public.User.where({
+      id: c.userId,
+    }).first();
 
     // Counts
-    const likes: any[] = await toArray(await this.prisma.db.orm.public.CommentLike.where({ commentId: c.id }));
+    const likes: any[] = await toArray(
+      await this.prisma.db.orm.public.CommentLike.where({ commentId: c.id }),
+    );
     const likesCount = likes.filter((l) => l.value === 1).length;
     const dislikesCount = likes.filter((l) => l.value === -1).length;
-    const myLike = currentUserId ? likes.find((l) => l.userId === currentUserId) : null;
+    const myLike = currentUserId
+      ? likes.find((l) => l.userId === currentUserId)
+      : null;
 
     // Reactions grouped by emoji
-    const rawReactions: any[] = await toArray(await this.prisma.db.orm.public.CommentReaction.where({ commentId: c.id }));
+    const rawReactions: any[] = await toArray(
+      await this.prisma.db.orm.public.CommentReaction.where({
+        commentId: c.id,
+      }),
+    );
     const emojiMap = new Map<string, { count: number; reactedByMe: boolean }>();
     for (const r of rawReactions) {
-      const existing = emojiMap.get(r.emoji) ?? { count: 0, reactedByMe: false };
+      const existing = emojiMap.get(r.emoji) ?? {
+        count: 0,
+        reactedByMe: false,
+      };
       existing.count += 1;
-      if (currentUserId && r.userId === currentUserId) existing.reactedByMe = true;
+      if (currentUserId && r.userId === currentUserId)
+        existing.reactedByMe = true;
       emojiMap.set(r.emoji, existing);
     }
     const reactions = Array.from(emojiMap.entries()).map(([emoji, data]) => ({
@@ -74,7 +98,9 @@ export class CommentsService {
     }));
 
     // Report count
-    const reports: any[] = await toArray(await this.prisma.db.orm.public.CommentReport.where({ commentId: c.id }));
+    const reports: any[] = await toArray(
+      await this.prisma.db.orm.public.CommentReport.where({ commentId: c.id }),
+    );
 
     return {
       id: c.id,
@@ -84,10 +110,13 @@ export class CommentsService {
       isHidden: c.isHidden,
       isPinned: c.isPinned,
       parentId: c.parentId,
+      mangaId: c.mangaId,
+      chapterId: c.chapterId,
       createdAt: c.createdAt?.toString(),
       updatedAt: c.updatedAt?.toString(),
       user: {
         id: user?.id,
+        username: user?.username,
         displayName: user?.displayName,
         profileImage: user?.profileImage,
         bannerImage: user?.bannerImage,
@@ -103,6 +132,13 @@ export class CommentsService {
     };
   }
 
+  // ─── Get ─────────────────────────────────────────────────────────────────────
+
+  async getComment(id: string, currentUserId?: string) {
+    const comment = await this.findComment(id);
+    return this.enrichComment(comment, currentUserId);
+  }
+
   // ─── List ────────────────────────────────────────────────────────────────────
 
   private async listComments(
@@ -111,11 +147,14 @@ export class CommentsService {
     currentUserId?: string,
   ) {
     // Fetch top-level comments (no parentId)
-    const allComments: any[] = await toArray(await this.prisma.db.orm.public.Comment.where(filter));
+    const allComments: any[] = await toArray(
+      await this.prisma.db.orm.public.Comment.where(filter),
+    );
 
     const getMs = (date: any) => {
       if (!date) return 0;
-      if (typeof date.epochMilliseconds === 'number') return date.epochMilliseconds;
+      if (typeof date.epochMilliseconds === 'number')
+        return date.epochMilliseconds;
       return new Date(date.toString()).getTime();
     };
 
@@ -131,9 +170,10 @@ export class CommentsService {
       startIdx = idx >= 0 ? idx + 1 : 0;
     }
     const page = topLevel.slice(startIdx, startIdx + DEFAULT_PAGE_SIZE);
-    const nextCursor = startIdx + DEFAULT_PAGE_SIZE < topLevel.length
-      ? page[page.length - 1]?.id ?? null
-      : null;
+    const nextCursor =
+      startIdx + DEFAULT_PAGE_SIZE < topLevel.length
+        ? (page[page.length - 1]?.id ?? null)
+        : null;
 
     // Enrich and attach replies
     const enriched = await Promise.all(
@@ -153,11 +193,19 @@ export class CommentsService {
     return { comments: enriched, nextCursor, total: topLevel.length };
   }
 
-  async getCommentsByManga(mangaId: string, cursor?: string, currentUserId?: string) {
+  async getCommentsByManga(
+    mangaId: string,
+    cursor?: string,
+    currentUserId?: string,
+  ) {
     return this.listComments({ mangaId }, cursor, currentUserId);
   }
 
-  async getCommentsByChapter(chapterId: string, cursor?: string, currentUserId?: string) {
+  async getCommentsByChapter(
+    chapterId: string,
+    cursor?: string,
+    currentUserId?: string,
+  ) {
     return this.listComments({ chapterId }, cursor, currentUserId);
   }
 
@@ -175,10 +223,16 @@ export class CommentsService {
     },
   ): Promise<any> {
     if (!data.mangaId && !data.chapterId) {
-      throw new BadRequestException('Comment must be attached to a mangaId or chapterId');
+      throw new BadRequestException(
+        'Comment must be attached to a mangaId or chapterId',
+      );
     }
 
     const user = await this.findUser(authUser.supabaseId);
+
+    if (!user.username) {
+      throw new BadRequestException('Debes configurar un @usuario en tu perfil para poder comentar.');
+    }
 
     // If reply, verify parent exists and resolve its context
     if (data.parentId) {
@@ -198,7 +252,48 @@ export class CommentsService {
       imageUrl: data.imageUrl || null,
     });
 
-    return this.enrichComment(comment, user.id);
+    // Notify mentioned users
+    const mentionRegex = /@([\w\.\-]+)/g;
+    const matches = Array.from(data.content.matchAll(mentionRegex));
+    const usernames = matches.map((m) => m[1]);
+
+    if (usernames.length > 0) {
+      // Find users by username
+      // Since prisma-next ORM doesn't support easy `in` for arrays yet, we iterate
+      const mentionedUsers: any[] = [];
+      for (const uname of usernames) {
+        const u = await this.prisma.db.orm.public.User.where({ username: uname }).first();
+        if (u) mentionedUsers.push(u);
+      }
+
+      for (const mentionedUser of mentionedUsers) {
+        if (mentionedUser.id !== user.id) {
+          await this.notifications.createMentionNotification(
+            mentionedUser.id,
+            user.id,
+            comment.id,
+          );
+        }
+      }
+    }
+
+    // Also notify parent comment owner if it's a reply and not themselves
+    if (data.parentId) {
+      const parent = await this.findComment(data.parentId);
+      if (parent.userId !== user.id) {
+        // Here we could have a 'REPLY' type, but for now we'll use MENTION or just create a notification
+        await this.prisma.db.orm.public.Notification.create({
+          userId: parent.userId,
+          actorId: user.id,
+          type: 'REPLY',
+          entityId: comment.id,
+        }).then(n => this.notifications['gateway'].sendNotificationToUser(parent.userId, n)).catch(() => {});
+      }
+    }
+
+    const enriched = await this.enrichComment(comment, user.id);
+    this.gateway.emitNewComment(enriched);
+    return enriched;
   }
 
   // ─── Update ──────────────────────────────────────────────────────────────────
@@ -219,13 +314,23 @@ export class CommentsService {
     if (data.content !== undefined) updateData.content = data.content;
     if (data.isSpoiler !== undefined) updateData.isSpoiler = data.isSpoiler;
 
-    const updated = await this.prisma.db.orm.public.Comment.where({ id: commentId }).update(updateData);
-    return this.enrichComment(updated, user.id);
+    await this.prisma.db.orm.public.Comment.where({
+      id: commentId,
+    }).update(updateData);
+    
+    const updated = await this.prisma.db.orm.public.Comment.where({ id: commentId }).first();
+    
+    const enriched = await this.enrichComment(updated, user.id);
+    this.gateway.emitUpdateComment(enriched);
+    return enriched;
   }
 
   // ─── Delete ──────────────────────────────────────────────────────────────────
 
-  async deleteComment(authUser: AuthenticatedUser, commentId: string): Promise<{ success: boolean }> {
+  async deleteComment(
+    authUser: AuthenticatedUser,
+    commentId: string,
+  ): Promise<{ success: boolean }> {
     const user = await this.findUser(authUser.supabaseId);
     const comment = await this.findComment(commentId);
 
@@ -234,6 +339,8 @@ export class CommentsService {
     }
 
     await this.prisma.db.orm.public.Comment.where({ id: commentId }).delete();
+    
+    this.gateway.emitDeleteComment(commentId, comment.mangaId || undefined, comment.chapterId || undefined);
     return { success: true };
   }
 
@@ -255,15 +362,41 @@ export class CommentsService {
     if (existing) {
       if (existing.value === value) {
         // Toggle off (remove the like/dislike)
-        await this.prisma.db.orm.public.CommentLike.where({ id: existing.id }).delete();
+        await this.prisma.db.orm.public.CommentLike.where({
+          id: existing.id,
+        }).delete();
         return { voted: false, value: 0 };
       }
       // Change vote
-      await this.prisma.db.orm.public.CommentLike.where({ id: existing.id }).update({ value });
+      await this.prisma.db.orm.public.CommentLike.where({
+        id: existing.id,
+      }).update({ value });
       return { voted: true, value };
     }
 
-    await this.prisma.db.orm.public.CommentLike.create({ commentId, userId: user.id, value });
+    await this.prisma.db.orm.public.CommentLike.create({
+      commentId,
+      userId: user.id,
+      value,
+    });
+
+    // Notify comment owner if it's a LIKE and not their own comment
+    if (value === 1) {
+      const comment = await this.findComment(commentId);
+      if (comment.userId !== user.id) {
+        await this.prisma.db.orm.public.Notification.create({
+          userId: comment.userId,
+          actorId: user.id,
+          type: 'LIKE',
+          entityId: comment.id,
+        })
+          .then((n) =>
+            this.notifications['gateway'].sendNotificationToUser(comment.userId, n),
+          )
+          .catch((e) => this.notifications['logger'].error('Failed to notify LIKE', e));
+      }
+    }
+
     return { voted: true, value };
   }
 
@@ -284,11 +417,17 @@ export class CommentsService {
     }).first();
 
     if (existing) {
-      await this.prisma.db.orm.public.CommentReaction.where({ id: existing.id }).delete();
+      await this.prisma.db.orm.public.CommentReaction.where({
+        id: existing.id,
+      }).delete();
       return { toggled: false, emoji };
     }
 
-    await this.prisma.db.orm.public.CommentReaction.create({ commentId, userId: user.id, emoji });
+    await this.prisma.db.orm.public.CommentReaction.create({
+      commentId,
+      userId: user.id,
+      emoji,
+    });
     return { toggled: true, emoji };
   }
 
@@ -318,10 +457,14 @@ export class CommentsService {
     });
 
     // Auto-hide if threshold reached
-    const reports: any[] = (await this.prisma.db.orm.public.CommentReport.where({ commentId })) as any;
+    const reports: any[] = (await this.prisma.db.orm.public.CommentReport.where(
+      { commentId },
+    )) as any;
     let hidden = comment.isHidden;
     if (reports.length >= REPORT_AUTO_HIDE_THRESHOLD && !comment.isHidden) {
-      await this.prisma.db.orm.public.Comment.where({ id: commentId }).update({ isHidden: true });
+      await this.prisma.db.orm.public.Comment.where({ id: commentId }).update({
+        isHidden: true,
+      });
       hidden = true;
     }
 
@@ -332,9 +475,12 @@ export class CommentsService {
 
   async pinComment(commentId: string, pinned: boolean): Promise<any> {
     await this.findComment(commentId);
-    const updated = await this.prisma.db.orm.public.Comment.where({ id: commentId }).update({
+    await this.prisma.db.orm.public.Comment.where({
+      id: commentId,
+    }).update({
       isPinned: pinned,
     });
+    const updated = await this.prisma.db.orm.public.Comment.where({ id: commentId }).first();
     return this.enrichComment(updated);
   }
 
@@ -343,14 +489,15 @@ export class CommentsService {
   async searchUsers(query: string): Promise<any[]> {
     if (!query || query.length < 2) return [];
 
-    // Fetch all users and filter by displayName (simple approach)
-    const all: any[] = (await this.prisma.db.orm.public.User.where({})) as any;
+    // Fetch all users and filter by username or displayName
+    const all: any[] = await toArray(await this.prisma.db.orm.public.User.where({}));
     const q = query.toLowerCase();
     return all
-      .filter((u) => u.displayName?.toLowerCase().includes(q))
+      .filter((u) => u.username?.toLowerCase().includes(q) || u.displayName?.toLowerCase().includes(q))
       .slice(0, 10)
       .map((u) => ({
         id: u.id,
+        username: u.username,
         displayName: u.displayName,
         profileImage: u.profileImage,
         badges: u.badges,

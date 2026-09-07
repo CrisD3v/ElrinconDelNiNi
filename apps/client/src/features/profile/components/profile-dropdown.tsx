@@ -25,7 +25,17 @@ export function ProfileDropdown({ className = '', onOpenSettings }: ProfileDropd
   const { profile, user, signOut } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const displayName = profile?.displayName || user?.email?.split('@')[0] || tProfile('defaultUser');
+  const generateRandomId = (id: string) => {
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) {
+      hash = (hash << 5) - hash + id.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash).toString().slice(0, 8).padStart(8, '0');
+  };
+
+  const fallbackUsername = profile?.id ? `user${generateRandomId(profile.id)}` : tProfile('defaultUser');
+  const displayUsername = profile?.username ? `@${profile.username}` : fallbackUsername;
   const email = profile?.email || user?.email || '';
   const avatarUrl = profile?.profileImage || null;
 
@@ -56,9 +66,10 @@ export function ProfileDropdown({ className = '', onOpenSettings }: ProfileDropd
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button
-            type="button"
-            className={`
+            <button
+              id="profile-menu-trigger"
+              type="button"
+              className={`
               flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-full
               border border-dark-600/70 hover:border-accent/50 bg-dark-900/60 hover:bg-dark-800
               transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/40
@@ -67,12 +78,12 @@ export function ProfileDropdown({ className = '', onOpenSettings }: ProfileDropd
           >
             <Avatar
               src={avatarUrl}
-              name={displayName}
+              name={displayUsername}
               size="sm"
               className="ring-1 ring-accent/30 group-hover:ring-accent/60 transition-all"
             />
             <span className="hidden lg:inline text-xs font-semibold text-text-primary max-w-[120px] truncate">
-              {displayName}
+              {displayUsername}
             </span>
             <ChevronDown
               size={14}
@@ -86,14 +97,14 @@ export function ProfileDropdown({ className = '', onOpenSettings }: ProfileDropd
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-dark-950/70 border border-dark-700/60 mb-1">
             <Avatar
               src={avatarUrl}
-              name={displayName}
+              name={displayUsername}
               size="md"
               className="ring-2 ring-accent/40"
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
                 <p className="text-sm font-bold text-text-primary truncate">
-                  {displayName}
+                  {displayUsername}
                 </p>
               </div>
               <p className="text-xs text-text-muted truncate mt-0.5">{email}</p>
@@ -111,14 +122,6 @@ export function ProfileDropdown({ className = '', onOpenSettings }: ProfileDropd
           <DropdownMenuItem onClick={handleOpenSettings} className="py-2.5">
             <Settings size={16} className="text-text-secondary" />
             <span>{tProfile('settings')}</span>
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => router.push('/favorites')}
-            className="py-2.5"
-          >
-            <Heart size={16} className="text-text-secondary" />
-            <span>{tProfile('favorites')}</span>
           </DropdownMenuItem>
 
           <DropdownMenuSeparator />

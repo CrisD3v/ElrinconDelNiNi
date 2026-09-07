@@ -3,6 +3,7 @@
 import { Link } from '@/i18n/navigation';
 import { NavLinks } from './nav-links';
 import { SearchButton } from './search-button';
+import { NotificationsBell } from './notifications-bell';
 import { LocaleSwitcher } from './locale-switcher';
 import { AuthButton } from './auth-button';
 import { ProfileDropdown } from './profile-dropdown';
@@ -32,8 +33,9 @@ export function Navbar() {
         </div>
 
         {/* Desktop right section */}
-        <div className="hidden md:flex items-center gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-4">
           <SearchButton />
+          <NotificationsBell />
           <LocaleSwitcher />
           {!isLoading && user ? <ProfileDropdown /> : <AuthButton />}
         </div>

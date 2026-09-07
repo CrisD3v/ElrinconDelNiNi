@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { Navbar } from '@/components/layout/navbar';
 import { AuthProvider } from '@/lib/auth/auth-context';
+import { WebSocketProvider } from '@/providers/websocket-provider';
 
 interface LocaleLayoutProps {
   children: React.ReactNode;
@@ -26,8 +27,10 @@ export default async function LocaleLayout({ children, params }: LocaleLayoutPro
   return (
     <NextIntlClientProvider locale={locale}>
       <AuthProvider>
-        <Navbar />
-        <main className="flex-1 pt-16">{children}</main>
+        <WebSocketProvider>
+          <Navbar />
+          <main className="flex-1 pt-16">{children}</main>
+        </WebSocketProvider>
       </AuthProvider>
     </NextIntlClientProvider>
   );

@@ -62,19 +62,19 @@ export function UserHoverCard({ user, children }: UserHoverCardProps) {
               {user.profileImage ? (
                 <img
                   src={user.profileImage}
-                  alt={user.displayName || 'User'}
+                  alt={user.username ? `@${user.username}` : 'User'}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-dark-600 text-gold-400 font-bold text-xl">
-                  {(user.displayName || 'U')[0].toUpperCase()}
+                  {(user.username || 'U')[0].toUpperCase()}
                 </div>
               )}
             </div>
 
             <div className="mt-2">
               <h4 className="text-base font-bold text-text-primary leading-tight">
-                {user.displayName || 'Usuario'}
+                {user.username ? `@${user.username}` : 'Usuario'}
               </h4>
               {user.description && (
                 <p className="text-sm text-text-secondary mt-2 line-clamp-3">

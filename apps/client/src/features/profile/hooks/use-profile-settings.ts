@@ -18,7 +18,7 @@ export function useProfileSettings({ isOpen, onClose, onSuccess }: UseProfileSet
   const t = useTranslations('profile');
   const { profile, updateUserProfile } = useAuth();
 
-  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
   const [description, setDescription] = useState('');
 
   // Avatar states
@@ -44,7 +44,7 @@ export function useProfileSettings({ isOpen, onClose, onSuccess }: UseProfileSet
   if (currentSyncKey !== prevSyncKey) {
     setPrevSyncKey(currentSyncKey);
     if (isOpen && profile) {
-      setDisplayName(profile.displayName || '');
+      setUsername(profile.username || '');
       setDescription(profile.description || '');
       setPreviewUrl(profile.profileImage || null);
       setBannerPreviewUrl(profile.bannerImage || null);
@@ -123,8 +123,8 @@ export function useProfileSettings({ isOpen, onClose, onSuccess }: UseProfileSet
 
     try {
       const formData = new FormData();
-      if (displayName.trim()) {
-        formData.append('displayName', displayName.trim());
+      if (username.trim()) {
+        formData.append('username', username.trim().toLowerCase());
       }
       if (description.trim() !== undefined) {
         formData.append('description', description.trim());
@@ -157,8 +157,8 @@ export function useProfileSettings({ isOpen, onClose, onSuccess }: UseProfileSet
   };
 
   return {
-    displayName,
-    setDisplayName,
+    username,
+    setUsername,
     description,
     setDescription,
     previewUrl,

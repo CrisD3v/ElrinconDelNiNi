@@ -20,8 +20,8 @@ export function ProfileSettingsModal({
   onSuccess,
 }: ProfileSettingsModalProps) {
   const {
-    displayName,
-    setDisplayName,
+    username,
+    setUsername,
     description,
     setDescription,
     previewUrl,
@@ -151,7 +151,7 @@ export function ProfileSettingsModal({
               >
                 <Avatar
                   src={previewUrl}
-                  name={displayName || profile?.displayName || profile?.email}
+                  name={username || profile?.username || profile?.email}
                   size="xl"
                   className="ring-4 ring-[#18191a] shadow-xl transition-transform group-hover:scale-105"
                 />
@@ -181,17 +181,18 @@ export function ProfileSettingsModal({
             />
           </div>
 
-          {/* Display Name */}
+          {/* Username */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-text-secondary flex items-center gap-1.5">
-              <User size={13} className="text-accent/80" />
-              <span>{t('nameLabel')}</span>
+              <span className="text-accent/80 font-bold">@</span>
+              <span>Nombre de usuario</span>
             </label>
             <input
               type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder={t('namePlaceholder')}
+              value={username}
+              onChange={(e) => setUsername(e.target.value.replace(/\s+/g, '').toLowerCase())}
+              placeholder="usuario123"
+              maxLength={30}
               className="
                 w-full px-3.5 py-2.5 bg-[#121314] border border-[#3e4242] rounded-xl
                 text-sm text-text-primary placeholder:text-text-muted
@@ -199,6 +200,7 @@ export function ProfileSettingsModal({
                 transition-colors
               "
             />
+            <p className="text-[10px] text-text-muted">Debe ser único y sin espacios.</p>
           </div>
 
           {/* Bio / Description */}

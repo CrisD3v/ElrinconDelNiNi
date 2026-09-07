@@ -4,6 +4,7 @@ import { AuthModule } from '#modules/auth/index.js';
 import { UsersModule } from '#modules/users/index.js';
 import { SeriesModule } from '#modules/series/index.js';
 import { CommentsModule } from '#modules/comments/index.js';
+import { NotificationsModule } from '#modules/notifications/index.js';
 import { AppController } from './app.controller.js';
 
 @Module({
@@ -13,6 +14,7 @@ import { AppController } from './app.controller.js';
     UsersModule,
     SeriesModule,
     CommentsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
 })

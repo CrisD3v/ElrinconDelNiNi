@@ -229,6 +229,8 @@
       "hate_speech": "Discurso de odio",
       "misinformation": "Información falsa",
       "other": "Otro"
-    }
+    },
+    "defaultUser": "usuario",
+    "attachedImage": "Imagen adjunta"
   }
 }

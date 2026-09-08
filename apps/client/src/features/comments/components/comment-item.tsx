@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useFormatter } from 'next-intl';
 import { useAuth } from '@/lib/auth/auth-context';
 import type { Comment } from '@elrincondelnini/types';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
@@ -13,17 +13,7 @@ import { CommentForm } from './comment-form';
 import { useEffect, useRef } from 'react';
 import { animate } from 'animejs';
 
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'ahora';
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h`;
-  const days = Math.floor(hrs / 24);
-  if (days < 30) return `${days}d`;
-  return new Date(dateStr).toLocaleDateString('es', { day: 'numeric', month: 'short' });
-}
+
 
 interface CommentItemProps {
   comment: Comment;
@@ -49,6 +39,7 @@ export function CommentItem({
   parentId,
 }: CommentItemProps) {
   const t = useTranslations('comments');
+  const format = useFormatter();
   const { profile } = useAuth();
 
   const [showReportDialog, setShowReportDialog] = useState(false);
@@ -119,7 +110,7 @@ export function CommentItem({
         <div className="flex items-baseline gap-2 mb-1 flex-wrap">
           <UserHoverCard user={comment.user!}>
             <span className="text-sm font-semibold text-text-primary cursor-pointer hover:underline decoration-gold-500/50 underline-offset-4">
-              @{comment.user?.username ?? 'usuario'}
+              @{comment.user?.username ?? t('defaultUser')}
             </span>
           </UserHoverCard>
           {comment.isPinned && (
@@ -130,7 +121,7 @@ export function CommentItem({
               {t('pinned')}
             </span>
           )}
-          <span className="text-xs text-text-muted">{timeAgo(comment.createdAt)}</span>
+          <span className="text-xs text-text-muted">{format.relativeTime(new Date(comment.createdAt))}</span>
           {comment.updatedAt !== comment.createdAt && (
             <span className="text-xs text-text-muted italic">({t('edited')})</span>
           )}
@@ -162,7 +153,7 @@ export function CommentItem({
             {comment.imageUrl && (
               <img
                 src={comment.imageUrl}
-                alt="Imagen adjunta"
+                alt={t('attachedImage')}
                 className="mt-2 max-h-64 rounded-xl object-cover border border-dark-600/30 cursor-zoom-in"
                 onClick={() => window.open(comment.imageUrl!, '_blank')}
               />

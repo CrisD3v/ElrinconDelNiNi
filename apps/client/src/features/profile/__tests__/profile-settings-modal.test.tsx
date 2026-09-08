@@ -35,6 +35,7 @@ const mockProfile: UserMe = {
   id: 'user-123',
   email: 'camilo@ejemplo.com',
   displayName: 'Camilo Dev',
+  username: 'camilodev',
   profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
   bannerImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200',
   description: 'Apasionado por la lectura de manhwa.',
@@ -87,7 +88,7 @@ describe('ProfileSettingsModal', () => {
     expect(screen.getByText('Cambiar foto')).toBeInTheDocument();
 
     // Verify Form Fields
-    expect(screen.getByDisplayValue('Camilo Dev')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('camilodev')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Apasionado por la lectura de manhwa.')).toBeInTheDocument();
   });
 

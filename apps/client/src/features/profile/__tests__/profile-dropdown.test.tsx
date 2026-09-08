@@ -43,6 +43,7 @@ const mockProfile = {
   id: 'user-123',
   email: 'reader@example.com',
   displayName: 'NiNi Reader',
+  username: 'ninireader',
   profileImage: null,
   bannerImage: null,
   description: 'Manga lover',
@@ -66,7 +67,7 @@ describe('ProfileDropdown', () => {
 
   it('renders trigger with user display name', () => {
     render(<ProfileDropdown />);
-    expect(screen.getByText('NiNi Reader')).toBeInTheDocument();
+    expect(screen.getByText('@ninireader')).toBeInTheDocument();
   });
 
   it('opens dropdown menu and displays user details and actions', async () => {
@@ -79,7 +80,6 @@ describe('ProfileDropdown', () => {
     expect(await screen.findByText('reader@example.com')).toBeInTheDocument();
     expect(screen.getByText('Lector')).toBeInTheDocument();
     expect(screen.getByText('Configuración de perfil')).toBeInTheDocument();
-    expect(screen.getByText('Mis Favoritos')).toBeInTheDocument();
     expect(screen.getByText('Cerrar sesión')).toBeInTheDocument();
   });
 

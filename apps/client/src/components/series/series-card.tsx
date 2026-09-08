@@ -1,6 +1,6 @@
 'use client';
 
-import Image from 'next/image';
+import { ImageWithLoader } from '@/components/ui/image-with-loader';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
 import { Badge } from '@/components/ui/badge';
@@ -46,11 +46,12 @@ export function SeriesCard({ series }: SeriesCardProps) {
         group-hover:scale-[1.04]
       ">
         {series.coverArtUrl ? (
-          <Image
+          <ImageWithLoader
             src={series.coverArtUrl}
             alt={series.title}
             fill
             sizes="(max-width: 640px) 160px, (max-width: 1024px) 180px, 200px"
+            wrapperClassName="w-full h-full"
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
         ) : (

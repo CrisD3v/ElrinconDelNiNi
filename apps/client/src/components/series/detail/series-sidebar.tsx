@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
+import { ImageWithLoader } from '@/components/ui/image-with-loader';
 import { useTranslations } from 'next-intl';
 import { Play, Plus, Check, Share2, Info } from 'lucide-react';
 import type { SeriesDetail } from '@/lib/api/types';
@@ -112,10 +112,11 @@ export function SeriesSidebar({ series }: SeriesSidebarProps) {
       <div className="flex flex-col animate-[fadeIn_0.5s_ease-out]">
         {/* Portada */}
         <div className="relative w-full aspect-[2/3] rounded-md overflow-hidden shadow-md mx-auto mb-5">
-          <Image
+          <ImageWithLoader
             src={coverImage}
             alt={series.title}
             fill
+            wrapperClassName="w-full h-full"
             className="object-cover"
             priority
           />

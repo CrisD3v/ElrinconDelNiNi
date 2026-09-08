@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
+import { ImageWithLoader } from '@/components/ui/image-with-loader';
 import { useParallaxTilt } from '../hooks/use-parallax-tilt';
 import type { HeroBannerCardProps } from '../types';
 
@@ -23,12 +23,13 @@ export function HeroBannerCard({ series }: HeroBannerCardProps) {
           style={{ transformStyle: 'preserve-3d' }}
         >
           {series.coverArtUrl ? (
-            <Image
+            <ImageWithLoader
               src={series.coverArtUrl}
               alt={series.title}
               fill
               priority
               sizes="(max-width: 768px) 100vw, 500px"
+              wrapperClassName="w-full h-full"
               className="object-cover"
             />
           ) : (

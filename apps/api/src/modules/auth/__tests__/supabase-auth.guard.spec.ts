@@ -3,6 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { ExecutionContext } from '@nestjs/common/interfaces';
 import { AuthService } from '../auth.service.js';
 import { SupabaseAuthGuard } from '../supabase-auth.guard.js';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('SupabaseAuthGuard', () => {
   let guard: SupabaseAuthGuard;

@@ -1,3 +1,3 @@
-export * from './auth.service.js';
-export * from './supabase-auth.guard.js';
-export * from './auth.module.js';
+export { AuthService } from './auth.service.js';
+export { SupabaseAuthGuard } from './supabase-auth.guard.js';
+export { AuthModule } from './auth.module.js';

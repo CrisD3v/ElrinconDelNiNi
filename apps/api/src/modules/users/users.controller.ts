@@ -20,7 +20,7 @@ import {
   ApiBearerAuth,
   ApiConsumes,
 } from '@nestjs/swagger';
-import { CurrentUser } from '#common/decorators/index.js';
+import { CurrentUser } from '#common/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '#common/types/index.js';
 import { SupabaseAuthGuard } from '#modules/auth/index.js';
 import { UsersService } from './users.service.js';

@@ -48,6 +48,14 @@ describe('CommentsService', () => {
           provide: PrismaService,
           useValue: mockPrismaService,
         },
+        {
+          provide: 'NotificationsService',
+          useValue: { createMentionNotification: jest.fn() },
+        },
+        {
+          provide: 'CommentsGateway',
+          useValue: { emitNewComment: jest.fn(), emitUpdateComment: jest.fn(), emitDeleteComment: jest.fn() },
+        },
       ],
     }).compile();
 

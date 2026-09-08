@@ -1,9 +1,27 @@
 {
   "moduleFileExtensions": ["js", "json", "ts"],
-  "rootDir": ".",
-  "testEnvironment": "node",
+  "rootDir": "..",
   "testRegex": ".e2e-spec.ts$",
+  "preset": "ts-jest/presets/default-esm",
+  "extensionsToTreatAsEsm": [".ts"],
+  "moduleNameMapper": {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^#modules/(.*)\\.js$": "<rootDir>/src/modules/$1",
+    "^#common/(.*)\\.js$": "<rootDir>/src/common/$1",
+    "^#modules/(.*)$": "<rootDir>/src/modules/$1",
+    "^#common/(.*)$": "<rootDir>/src/common/$1"
+  },
   "transform": {
-    "^.+\\.(t|j)s$": "ts-jest"
-  }
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "useESM": true,
+        "tsconfig": {
+          "moduleResolution": "node",
+          "resolvePackageJsonExports": false
+        }
+      }
+    ]
+  },
+  "testEnvironment": "node"
 }

@@ -261,10 +261,10 @@ export class SeriesService {
   ): Promise<SeriesListDto> {
     try {
       const requestedLimit = params.limit || 20;
-      // Request extra candidates to account for titles lacking readable chapters
       const fetchParams = {
         ...params,
-        limit: Math.min(100, requestedLimit * 2),
+        limit: requestedLimit,
+        hasAvailableChapters: 'true',
       };
 
       const { data } = await firstValueFrom(
@@ -279,25 +279,12 @@ export class SeriesService {
             : [lang || 'es'];
 
       // Quick candidate filter: check availableTranslatedLanguages array
-      const candidateItems = (data.data || []).filter((item: any) => {
+      // (MangaDex sometimes still returns mangas that have available chapters in *other* languages)
+      const validItems = (data.data || []).filter((item: any) => {
         const available: string[] =
           item.attributes?.availableTranslatedLanguages || [];
         return available.some((l: string) => targetLangs.includes(l));
       });
-
-      // Strict chapter verification in parallel (discards stale MangaDex records like Noragami in ES)
-      const checks = await Promise.allSettled(
-        candidateItems.map((item: any) =>
-          this.hasChaptersInLanguage(item.id, lang || 'es'),
-        ),
-      );
-
-      const validItems = candidateItems
-        .filter((_, idx) => {
-          const res = checks[idx];
-          return res.status === 'fulfilled' && res.value === true;
-        })
-        .slice(0, requestedLimit);
 
       const series = await Promise.all(
         validItems.map((item: any) => this.mapMangaToDto(item, lang)),

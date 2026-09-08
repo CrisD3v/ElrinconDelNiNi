@@ -62,9 +62,9 @@ describe('SeriesService', () => {
         `${process.env.BASE_URL}/manga`,
         expect.objectContaining({
           params: {
-            limit: 10,
+            limit: 20,
             offset: 0,
-            'availableTranslatedLanguage[]': 'es',
+            'availableTranslatedLanguage[]': ['es', 'es-la'],
             'includes[]': 'cover_art',
           },
         }),
@@ -92,8 +92,9 @@ describe('SeriesService', () => {
           params: {
             limit: 100,
             offset: 0,
-            'translatedLanguage[]': 'en',
+            'translatedLanguage[]': ['en'],
             'order[chapter]': 'asc',
+            includeExternalUrl: 0,
           },
         }),
       );
@@ -127,7 +128,12 @@ describe('SeriesService', () => {
         config: { headers: new AxiosHeaders() },
       };
 
-      mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockHttpService.get.mockImplementation((url) => {
+        if (url.includes('aggregate')) {
+          return of({ data: { volumes: { "1": {} } } });
+        }
+        return of(mockResponse);
+      });
 
       const result = await service.getTopSeries({ lang: SeriesLanguage.EN });
 
@@ -164,7 +170,12 @@ describe('SeriesService', () => {
         config: { headers: new AxiosHeaders() },
       };
 
-      mockHttpService.get.mockReturnValue(of(mockResponse));
+      mockHttpService.get.mockImplementation((url) => {
+        if (url.includes('aggregate')) {
+          return of({ data: { volumes: { "1": {} } } });
+        }
+        return of(mockResponse);
+      });
 
       const result = await service.getSeriesDetail('12345');
 
